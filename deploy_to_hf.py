@@ -21,19 +21,27 @@ def save_config(username, token):
 
 def deploy(username=None, token=None):
     cfg = load_config()
-    username = username or cfg.get("username")
     token = token or cfg.get("token") or os.environ.get("HF_TOKEN")
+    username = username or cfg.get("username")
 
-    if not username or not token:
-        print("[ERROR] Hugging Face username과 write token이 필요합니다.")
-        print("사용법: python deploy_to_hf.py <HF_USERNAME> <HF_TOKEN>")
+    if not token:
+        print("[ERROR] Hugging Face write token이 필요합니다.")
+        print("사용법: python deploy_to_hf.py <HF_TOKEN> 또는 python deploy_to_hf.py <HF_USERNAME> <HF_TOKEN>")
         return False
 
-    save_config(username, token)
-
     from huggingface_hub import HfApi, create_repo
-
     api = HfApi(token=token)
+
+    if not username:
+        try:
+            user_info = api.whoami()
+            username = user_info.get("name")
+            print(f"[OK] Hugging Face 계정 자동 확인: @{username}")
+        except Exception as e:
+            print(f"[ERROR] 토큰 유효성 검사 실패: {e}")
+            return False
+
+    save_config(username, token)
     repo_id = f"{username}/suno-studio"
 
     print(f"[1/3] Hugging Face Space 확인 및 생성 중: {repo_id}...")
@@ -95,6 +103,13 @@ def deploy(username=None, token=None):
     return True
 
 if __name__ == "__main__":
-    u = sys.argv[1] if len(sys.argv) > 1 else None
-    t = sys.argv[2] if len(sys.argv) > 2 else None
-    deploy(u, t)
+    if len(sys.argv) == 2:
+        arg = sys.argv[1].strip()
+        if arg.startswith("hf_"):
+            deploy(token=arg)
+        else:
+            deploy(username=arg)
+    elif len(sys.argv) > 2:
+        deploy(username=sys.argv[1].strip(), token=sys.argv[2].strip())
+    else:
+        deploy()
