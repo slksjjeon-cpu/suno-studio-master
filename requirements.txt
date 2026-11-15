@@ -10,8 +10,10 @@ yt-dlp>=2024.0.0
 pillow>=10.0.0
 requests>=2.31.0
 cryptography>=42.0.0
+google-api-python-client>=2.0.0
+google-auth-oauthlib>=1.0.0
+google-auth-httplib2>=0.1.0
 
 # Optional: used by the reference copyright checker.
-# Without these the check reports UNVERIFIED instead of "SAFE".
 # shazamio>=0.7.0
 # faster-whisper>=1.0.0

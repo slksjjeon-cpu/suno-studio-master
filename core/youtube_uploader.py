@@ -6,11 +6,20 @@ import time
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 
-from google.oauth2.credentials import Credentials
-from google.auth.transport.requests import Request
-from google_auth_oauthlib.flow import Flow
-import googleapiclient.discovery
-from googleapiclient.http import MediaFileUpload
+try:
+    from google.oauth2.credentials import Credentials
+    from google.auth.transport.requests import Request
+    from google_auth_oauthlib.flow import Flow
+    import googleapiclient.discovery
+    from googleapiclient.http import MediaFileUpload
+    HAS_GOOGLE_API = True
+except ImportError:
+    Credentials = None
+    Request = None
+    Flow = None
+    googleapiclient = None
+    MediaFileUpload = None
+    HAS_GOOGLE_API = False
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
@@ -62,8 +71,8 @@ def is_youtube_authenticated() -> bool:
     except Exception:
         return False
 
-def _load_credentials() -> Optional[Credentials]:
-    if not TOKEN_PATH.exists():
+def _load_credentials() -> Optional[Any]:
+    if not HAS_GOOGLE_API or not TOKEN_PATH.exists():
         return None
     try:
         data = json.loads(TOKEN_PATH.read_text(encoding="utf-8"))
