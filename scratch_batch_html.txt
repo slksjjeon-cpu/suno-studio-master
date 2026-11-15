@@ -1,0 +1,66 @@
+function createBatchRowElement(list, val = '') {
+  const idx = list.children.length + 1;
+  const row = document.createElement('div');
+  row.className = 'batch-url-row flex items-center gap-2 bg-[#090c14] border border-slate-800 rounded-lg p-1.5 transition focus-within:border-amber-400/80';
+  row.innerHTML = `
+    <span class="batch-row-num text-[10px] font-mono font-bold text-amber-400/90 w-5 text-center shrink-0">${idx}</span>
+    <input type="text" 
+      placeholder="YouTube 또는 Suno 링크 붙여넣기" 
+      value="${val ? val.replace(/"/g, '&quot;') : ''}"
+      class="batch-url-input flex-1 bg-transparent border-0 outline-none text-xs text-white placeholder-slate-500 font-mono"
+      oninput="updateBatchBadgeCount()"
+    >
+    <button type="button" onclick="pasteToBatchRow(this)" title="클립보드 붙여넣기" class="text-slate-400 hover:text-amber-300 text-xs px-1.5 py-1 transition cursor-pointer">
+      <i class="fa-regular fa-paste"></i>
+    </button>
+    <button type="button" onclick="removeBatchUrlRow(this)" title="이 줄 삭제" class="text-slate-500 hover:text-rose-400 text-xs px-1.5 py-1 transition cursor-pointer">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  `;
+  list.appendChild(row);
+  return row;
+}
+
+window.toggleBatchMode = function(forceOpen = null) {
+  const container = document.getElementById('batch-container');
+  const badge = document.getElementById('batch-toggle-badge');
+  if (!container) return;
+  
+  const shouldOpen = forceOpen !== null ? forceOpen : container.classList.contains('hidden');
+  if (shouldOpen) {
+    container.classList.remove('hidden');
+    if (badge) {
+      badge.textContent = '닫기';
+      badge.className = 'text-[9px] px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 font-mono';
+    }
+    const list = document.getElementById('batch-urls-list');
+    if (list && list.children.length === 0) {
+      createBatchRowElement(list, '');
+      createBatchRowElement(list, '');
+      updateBatchBadgeCount();
+    }
+  } else {
+    container.classList.add('hidden');
+    if (badge) {
+      badge.textContent = '열기';
+      badge.className = 'text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono';
+    }
+  }
+};
+
+window.addBatchUrlRow = function(val = '') {
+  const container = document.getElementById('batch-container');
+  if (container && container.classList.contains('hidden')) {
+    toggleBatchMode(true);
+    return;
+  }
+
+  const list = document.getElementById('batch-urls-list');
+  if (!list) return;
+
+  const row = createBatchRowElement(list, val);
+  updateBatchBadgeCount();
+
+  const input = row.querySelector('input');
+  if (input && !val) input.focus();
+};

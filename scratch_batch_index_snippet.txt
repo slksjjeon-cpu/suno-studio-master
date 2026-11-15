@@ -1,0 +1,106 @@
+            <div class="text-[10px] text-slate-400 flex items-center justify-between font-mono">
+              <label class="flex items-center gap-1.5 cursor-pointer text-slate-300 hover:text-cyan-300 select-none">
+                <input type="checkbox" id="suno-auto-master-toggle" checked class="accent-cyan-400 rounded">
+                <span>링크 입력 시 즉시 마스터링 자동 시작 (One-Click)</span>
+              </label>
+              <span id="suno-link-detect-badge" class="hidden text-amber-400 font-semibold animate-pulse">링크 감지됨!</span>
+            </div>
+          </div>
+
+          <!-- Batch Job Button & Container -->
+          <div class="flex items-center justify-between px-1">
+            <button type="button" id="btn-toggle-batch-mode" onclick="toggleBatchMode()" class="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1.5 transition cursor-pointer select-none">
+              <i class="fa-solid fa-layer-group text-amber-400"></i>
+              <span id="batch-toggle-label">⚡ 다중 URL 배치 작업 (고속 MP4/MP3 일괄 내보내기)</span>
+              <span id="batch-toggle-badge" class="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">열기</span>
+            </button>
+            <button type="button" onclick="addBatchUrlRow()" class="text-[11px] px-2.5 py-1 rounded bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 font-bold transition flex items-center gap-1 cursor-pointer active:scale-95 shadow-sm">
+              <i class="fa-solid fa-plus text-[10px]"></i>
+              <span>배치작업 (URL 추가)</span>
+            </button>
+          </div>
+
+          <!-- BATCH JOB CONTAINER -->
+          <div id="batch-container" class="hidden daw-inset p-3.5 flex flex-col gap-3 bg-gradient-to-br from-[#151322] via-[#0e101a] to-[#090b12] border border-amber-500/40 rounded-xl shadow-xl shadow-amber-950/20">
+            <div class="flex items-center justify-between pb-1 border-b border-amber-500/20">
+              <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs">
+                  <i class="fa-solid fa-bolt-lightning"></i>
+                </div>
+                <div>
+                  <h3 class="text-xs font-black text-amber-300 tracking-wide">다중 URL 고속 배치 내보내기</h3>
+                  <p class="text-[9.5px] text-slate-400">유튜브/Suno 영상을 빠른 속도로 일괄 다운로드 & MP4 영상 및 MP3 음원으로 동시 생성합니다.</p>
+                </div>
+              </div>
+              <span id="batch-count-badge" class="text-[10px] px-2 py-0.5 rounded-full bg-amber-950 border border-amber-500/30 text-amber-300 font-mono font-bold">0개 URL</span>
+            </div>
+
+            <!-- Dynamic URL Input List -->
+            <div id="batch-urls-list" class="flex flex-col gap-2 max-h-[260px] overflow-y-auto pr-1">
+              <!-- Dynamically populated rows -->
+            </div>
+
+            <!-- Control Bar: Add Row & Clear -->
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-white/5">
+              <button type="button" onclick="addBatchUrlRow()" class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer active:scale-95">
+                <i class="fa-solid fa-plus"></i>
+                <span>배치작업 (+ URL 1개 늘리기)</span>
+              </button>
+              <button type="button" onclick="clearBatchUrls()" class="text-[11px] text-slate-400 hover:text-rose-400 transition flex items-center gap-1 cursor-pointer">
+                <i class="fa-regular fa-trash-can"></i>
+                <span>비우기</span>
+              </button>
+            </div>
+
+            <!-- Options Checkboxes -->
+            <div class="p-2.5 rounded-lg bg-[#07090e]/80 border border-slate-800 flex flex-col gap-2 text-xs font-mono">
+              <div class="flex flex-wrap items-center gap-4 text-slate-200">
+                <label class="flex items-center gap-1.5 cursor-pointer hover:text-cyan-300 select-none">
+                  <input type="checkbox" id="batch-opt-mp3" checked class="accent-amber-400 rounded">
+                  <span>MP3 저장 (320kbps 고음질 오디오)</span>
+                </label>
+                <label class="flex items-center gap-1.5 cursor-pointer hover:text-cyan-300 select-none">
+                  <input type="checkbox" id="batch-opt-mp4" checked class="accent-amber-400 rounded">
+                  <span>MP4 저장 (고화질 동영상 비디오)</span>
+                </label>
+              </div>
+              <div class="pt-1.5 border-t border-white/5 flex items-center justify-between">
+                <label class="flex items-center gap-1.5 cursor-pointer text-slate-400 hover:text-amber-300 select-none">
+                  <!-- User explicit requirement: 기본값 체크해제 (unchecked) -->
+                  <input type="checkbox" id="batch-opt-mastering" class="accent-amber-400 rounded">
+                  <span>🎛️ 스튜디오 마스터링 적용 (체크 시 마스터링 엔진 통과 · 시간 소요)</span>
+                </label>
+                <span class="text-[9px] text-slate-400 font-sans">기본: 초고속 다이렉트 변환</span>
+              </div>
+            </div>
+
+            <!-- Batch Start Button -->
+            <div class="flex items-center gap-2">
+              <button type="button" id="btn-start-batch" onclick="startBatchJob()" class="flex-1 py-2.5 rounded-lg bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 text-slate-950 text-xs font-black tracking-wide shadow-lg shadow-amber-500/25 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+                <i class="fa-solid fa-play"></i>
+                <span>🚀 배치 일괄 다운로드 & 변환 시작</span>
+              </button>
+              <button type="button" id="btn-cancel-batch" onclick="cancelBatchJob()" class="hidden px-3.5 py-2.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-bold transition cursor-pointer">
+                <span>취소</span>
+              </button>
+            </div>
+
+            <!-- Batch Live Progress & Results -->
+            <div id="batch-results-panel" class="hidden flex flex-col gap-2 pt-2 border-t border-amber-500/20">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span id="batch-status-spinner" class="text-amber-400 text-xs animate-spin"><i class="fa-solid fa-spinner"></i></span>
+                  <span id="batch-summary-text" class="text-xs font-bold text-amber-300">작업 진행 중 (0/0)</span>
+                </div>
+                <button type="button" id="btn-batch-download-zip" onclick="downloadBatchZip()" class="hidden px-2.5 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold transition flex items-center gap-1 cursor-pointer shadow-sm">
+                  <i class="fa-solid fa-file-zipper"></i>
+                  <span>전체 파일 ZIP 일괄 다운로드</span>
+                </button>
+              </div>
+
+              <!-- Item Results List -->
+              <div id="batch-items-container" class="flex flex-col gap-1.5 max-h-[300px] overflow-y-auto pr-1">
+                <!-- Items inserted dynamically -->
+              </div>
+            </div>
+          </div>

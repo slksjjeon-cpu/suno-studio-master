@@ -1,0 +1,802 @@
+/* ==========================================================================
+   WORKSPACE THEME SYSTEM: DARK MODE & COMPONENT STYLING (TOSS STYLE)
+   ABSOLUTE BAN ON BROWN / AMBER - SLEEK CHARCOAL NAVY (#1b2028) & TOSS BLUE (#3182f6)
+   ========================================================================== */
+
+/* Hum file select helper */
+.hum-file-select-row { min-width: 0; }
+.hum-file-select-row select { min-width: 0; width: 0; }
+.hum-file-select-row .hum-select-button { flex: 0 0 auto; white-space: nowrap; word-break: keep-all; min-width: 76px; }
+
+/* Theme toggle button in header */
+#ws-design-bar #ws-theme-toggle { 
+  border: 0; 
+  border-radius: 9px; 
+  padding: 8px 14px; 
+  background: #f2f4f6; 
+  color: #4e5968; 
+  font-size: 11px; 
+  font-weight: 700; 
+  letter-spacing: 0; 
+  white-space: nowrap; 
+  cursor: pointer; 
+  transition: all 0.15s ease;
+}
+body:not(.workspace-modern) #ws-theme-toggle { display: none; }
+#ws-design-bar #ws-theme-toggle:hover { color: #1b64da; background: #e8f3ff; }
+
+@media (max-width: 640px) {
+  #ws-design-bar > div { gap: 6px; }
+  #ws-design-bar #ws-theme-toggle, #ws-design-bar #ws-design-toggle { font-size: 10px; padding: 7px 9px; }
+  .hum-file-select-row { flex-wrap: wrap; }
+  .hum-file-select-row label { width: 100%; }
+  .hum-file-select-row select { flex: 1 1 0; }
+  #ws-shell #view-hum-studio { min-width: 0; width: 100%; }
+  #ws-shell #hum-mix .grid > div { min-width: 0; }
+  #ws-shell #hum-mix label { flex-shrink: 0; }
+  #ws-shell #hum-mix input[type=range] { min-width: 25px; }
+  #ws-shell #hum-mix .suno-speed-header { flex-wrap: wrap; }
+}
+
+/* ==========================================================================
+   DARK MODE WORKSPACE (TOSS STYLE - ABSOLUTE BAN ON BROWN / AMBER)
+   ========================================================================== */
+body.workspace-modern[data-workspace-theme="dark"] { 
+  background: #101318 !important; 
+  color-scheme: dark; 
+}
+
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell { 
+  --bg-app: #101318; 
+  --bg-panel: #1b2028; 
+  --bg-panel-header: #1b2028; 
+  --bg-card: #1b2028; 
+  --bg-inset: #151c26; 
+  --border-subtle: #2d3644; 
+  --border-strong: #3e4b5c; 
+  --text-main: #f3f5f8; 
+  --text-secondary: #c2cbd6; 
+  --text-muted: #8e9cae; 
+  --theme-primary: #3182f6; 
+  --theme-primary-bg: #1d3554; 
+  color: #e9edf3; 
+}
+
+/* Header design bar & toggles in Dark Mode */
+body.workspace-modern[data-workspace-theme="dark"] #ws-design-bar { 
+  background: #151921 !important; 
+  color: #9db0c6 !important; 
+  border-color: #27313f !important; 
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-design-bar :is(#ws-theme-toggle, #ws-design-toggle) { 
+  background: #1f2734 !important; 
+  color: #d8e2ee !important; 
+  border: 1px solid #334255 !important; 
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-design-bar :is(#ws-theme-toggle, #ws-design-toggle):hover { 
+  background: #2a374a !important; 
+  color: #ffffff !important; 
+  border-color: #4b617d !important; 
+}
+
+/* Sidebar in Dark Mode */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-sidebar { 
+  background: #151921 !important; 
+  border-color: #27313f !important; 
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-brand { color: #f3f6fa !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-brand-mark { background: #3182f6 !important; color: #fff !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-sidebar-label { color: #738499 !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-sidebar button { color: #9bb0c7 !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-sidebar button:hover { background: #1f2837 !important; color: #ffffff !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-sidebar button.is-selected { color: #559bff !important; background: #19273c !important; font-weight: 700 !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-sidebar button.is-selected > i { color: #559bff !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-sidebar-bottom, 
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-sidebar-bottom small { color: #718296 !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-live-dot { background: #3182f6 !important; box-shadow: 0 0 6px rgba(49, 130, 246, 0.6); }
+
+/* Session bar & main titles */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-session { border-color: #27313f !important; color: #8e9cae !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #ws-track-name { color: #e1e8f2 !important; font-weight: 600 !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #ws-queue { background: #1f2734 !important; border: 1px solid #334255 !important; color: #c8d5e4 !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #ws-eyebrow { color: #559bff !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #ws-title { color: #f4f7fb !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #ws-subtitle { color: #98a7b9 !important; }
+
+/* Page 01 Record card & bottom row */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-record-card { 
+  background: #172335 !important; 
+  border: 1px solid #283a54 !important; 
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-record-top { color: #8bb2e5 !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-record-top span:last-child { background: #223550 !important; color: #559bff !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-record { background: #3182f6 !important; box-shadow: 0 16px 35px rgba(49, 130, 246, 0.35) !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-record-bottom { color: #8bb2e5 !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-record-bottom b { color: #ffffff !important; }
+
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-bottom-row, 
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-footer, 
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-process > div + div { border-color: #27313f !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-bottom-row p, 
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-process p, 
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-footer { color: #8b9baa !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-tiny-label, 
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-process span { color: #728498 !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-process h3 { color: #e3ecf6 !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-link { color: #559bff !important; }
+
+/* ==========================================================================
+   CARDS & CONTAINERS: CLEAN TOSS SLATE DARK (#1b2028), NEVER BROWN
+   ========================================================================== */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is(.ws-white-card, .daw-card, .draft-card-pro, [class*="draft-card"]) { 
+  background: #1b2028 !important; 
+  background-color: #1b2028 !important; 
+  border: 1px solid #2f3844 !important; 
+  border-radius: 18px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important; 
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .draft-card-pro:hover {
+  border-color: #435266 !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .daw-card-header { 
+  background: transparent !important; 
+  border-color: #2d3642 !important; 
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .daw-card-header h2 { color: #f0f4f8 !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-white-card h2 { color: #f0f4f8 !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-white-card > p, 
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-export-options > p, 
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ws-edit-toolbar { color: #9aa8b8 !important; }
+
+/* INSETS & CONTAINERS: Deep Charcoal Navy (#151c26), NEVER BROWN */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is(.daw-inset, .suno-speed-card, .ws-fold, .suno-speed-seek-section, #batch-container, #batch-playlist-inline-box, #yt-raw-download-card, #drafts-empty-state, #active-job-box, [class*="bg-[#0e1424]"], [class*="bg-[#121929]"], [class*="bg-[#131b2e]"], [class*="bg-[#101726]"], [class*="bg-[#090b10]"]):not(button):not([class*="btn-"]):not(input):not(.peer):not(.peer + div):not(.suno-toggle-track):not([id*="progress"]):not([class*="progress"]):not([id^="progress-"]):not([id*="bar"]):not(.suno-speed-thumb-wrap) { 
+  background: #151c26 !important; 
+  background-color: #151c26 !important; 
+  border-color: #283444 !important; 
+}
+
+/* SPECTRUM ANALYZER & METRICS CANVAS */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is([id^="spectrum-canvas-"], .relative.w-full.h-24.bg-\[\#07090e\]) {
+  background: #10151f !important;
+  border-color: #273344 !important;
+  border-radius: 10px !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is(.grid.grid-cols-3.gap-1\.5.text-\[10px\].bg-\[\#0e111a\]) {
+  background: #141b26 !important;
+  border-color: #273444 !important;
+  border-radius: 10px !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #waveform-container { 
+  background: #10151f !important; 
+  border: 1px solid #273344 !important; 
+}
+
+/* ==========================================================================
+   BUTTONS, CHIPS, STEPPERS & PRESETS: ABSOLUTELY NO WHITE BOXES!
+   Clean Dark Surface (#1c2432) with Crisp Slate Border (#36465a)
+   ========================================================================== */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is(
+  .slice-preset-btn,
+  .btn-seek-quick,
+  .btn-fine-speed-pill,
+  .btn-fine-pitch-pill,
+  #btn-speed-step-down,
+  #btn-speed-step-up,
+  #btn-pitch-step-semitone-down,
+  #btn-pitch-step-down,
+  #btn-pitch-step-up,
+  #btn-pitch-step-semitone-up,
+  #btn-pitch-reset,
+  #btn-pitch-preview-audition,
+  #btn-sync-section-to-speed,
+  .suno-speed-pill,
+  #btn-speed-pill-menu,
+  .suno-speed-reset-btn,
+  #btn-suno-speed-reset,
+  .btn-toss-secondary,
+  #btn-download-raw-mp4,
+  #btn-load-demo,
+  .hum-source-tab,
+  .hum-select-button,
+  button[onclick*="resetHumJob"],
+  button[onclick*="focusPlaylistInput"],
+  button[onclick*="addBatchUrlRow"],
+  label[for="batch-playlist-html-file"],
+  #btn-enqueue-preview,
+  .monitor-btn
+) {
+  background: #1c2432 !important;
+  background-color: #1c2432 !important;
+  color: #dbe4f0 !important;
+  border: 1px solid #36465a !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+  transition: all 0.15s ease !important;
+  cursor: pointer !important;
+}
+
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is(
+  .slice-preset-btn,
+  .btn-seek-quick,
+  .btn-fine-speed-pill,
+  .btn-fine-pitch-pill,
+  #btn-speed-step-down,
+  #btn-speed-step-up,
+  #btn-pitch-step-semitone-down,
+  #btn-pitch-step-down,
+  #btn-pitch-step-up,
+  #btn-pitch-step-semitone-up,
+  #btn-pitch-reset,
+  #btn-pitch-preview-audition,
+  #btn-sync-section-to-speed,
+  .suno-speed-pill,
+  #btn-speed-pill-menu,
+  .suno-speed-reset-btn,
+  #btn-suno-speed-reset,
+  .btn-toss-secondary,
+  #btn-download-raw-mp4,
+  #btn-load-demo,
+  .hum-source-tab,
+  .hum-select-button,
+  button[onclick*="resetHumJob"],
+  button[onclick*="focusPlaylistInput"],
+  button[onclick*="addBatchUrlRow"],
+  label[for="batch-playlist-html-file"],
+  #btn-enqueue-preview,
+  .monitor-btn
+):hover {
+  background: #273447 !important;
+  background-color: #273447 !important;
+  color: #ffffff !important;
+  border-color: #4f6482 !important;
+}
+
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is(
+  .slice-preset-btn,
+  .btn-seek-quick,
+  .btn-fine-speed-pill,
+  .btn-fine-pitch-pill,
+  #btn-speed-step-down,
+  #btn-speed-step-up,
+  #btn-pitch-step-semitone-down,
+  #btn-pitch-step-down,
+  #btn-pitch-step-up,
+  #btn-pitch-step-semitone-up,
+  #btn-pitch-reset,
+  #btn-pitch-preview-audition,
+  #btn-sync-section-to-speed,
+  .suno-speed-pill,
+  #btn-speed-pill-menu,
+  .suno-speed-reset-btn,
+  #btn-suno-speed-reset,
+  .btn-toss-secondary,
+  #btn-download-raw-mp4,
+  #btn-load-demo,
+  .hum-source-tab,
+  .hum-select-button,
+  button[onclick*="resetHumJob"],
+  button[onclick*="focusPlaylistInput"],
+  button[onclick*="addBatchUrlRow"],
+  label[for="batch-playlist-html-file"],
+  #btn-enqueue-preview,
+  .monitor-btn
+) * {
+  color: inherit !important;
+}
+
+/* ACTIVE / SELECTED STATE FOR PRESET PILLS & BUTTONS: TOSS BLUE */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is(
+  .slice-preset-btn.active,
+  .slice-preset-btn[class*="bg-cyan-"],
+  .btn-seek-quick.active,
+  .btn-fine-speed-pill.active,
+  .btn-fine-pitch-pill.active,
+  .btn-fine-pitch-pill[class*="bg-purple-600"],
+  .btn-fine-pitch-pill[data-pitch="0"].active,
+  .hum-source-tab.active,
+  .monitor-btn.active
+) {
+  background: #3182f6 !important;
+  background-color: #3182f6 !important;
+  color: #ffffff !important;
+  border: 1px solid #1b64da !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 10px rgba(49, 130, 246, 0.4) !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is(
+  .slice-preset-btn.active,
+  .slice-preset-btn[class*="bg-cyan-"],
+  .btn-seek-quick.active,
+  .btn-fine-speed-pill.active,
+  .btn-fine-pitch-pill.active,
+  .btn-fine-pitch-pill[class*="bg-purple-600"],
+  .btn-fine-pitch-pill[data-pitch="0"].active,
+  .hum-source-tab.active,
+  .monitor-btn.active
+) * {
+  color: #ffffff !important;
+}
+
+/* BIG STEP 3 TRANSITION BUTTON */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #btn-goto-step-3 {
+  background: #1f293a !important;
+  background-color: #1f293a !important;
+  color: #559bff !important;
+  border: 1px solid #3a4d68 !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #btn-goto-step-3:hover {
+  background: #29374e !important;
+  background-color: #29374e !important;
+  color: #ffffff !important;
+  border-color: #5a7399 !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #btn-goto-step-3 * {
+  color: inherit !important;
+}
+
+/* STEP 3 PREVIEW ENQUEUE BUTTON */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #btn-enqueue-preview {
+  background: #1f293a !important;
+  background-color: #1f293a !important;
+  color: #dbe4f0 !important;
+  border: 1px solid #3a4d68 !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #btn-enqueue-preview:hover {
+  background: #29374e !important;
+  background-color: #29374e !important;
+  color: #ffffff !important;
+  border-color: #5a7399 !important;
+}
+
+/* DROPDOWN MENUS (Speed & Export Hub) */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is(#speed-preset-dropdown, #export-hub-dropdown) {
+  background: #171f2c !important;
+  border: 1px solid #344356 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 12px !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .speed-preset-item {
+  color: #dbe4f0 !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .speed-preset-item:hover {
+  background: #263448 !important;
+  color: #ffffff !important;
+}
+
+/* PRIMARY ACTION BUTTONS: TOSS BLUE */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is(
+  #btn-fetch-suno,
+  #btn-enqueue-full-master,
+  #btn-play-section,
+  #btn-start-batch,
+  #btn-import-playlist-run,
+  #btn-batch-download-zip,
+  .btn-toss-primary,
+  .ws-primary,
+  #btn-instant-master-step2,
+  #btn-export-speed-audio,
+  #btn-export-hub-toggle
+) { 
+  background: #3182f6 !important; 
+  background-color: #3182f6 !important; 
+  color: #ffffff !important; 
+  border-color: #3182f6 !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is(
+  #btn-fetch-suno,
+  #btn-enqueue-full-master,
+  #btn-play-section,
+  #btn-start-batch,
+  #btn-import-playlist-run,
+  #btn-batch-download-zip,
+  .btn-toss-primary,
+  .ws-primary,
+  #btn-instant-master-step2,
+  #btn-export-speed-audio,
+  #btn-export-hub-toggle
+):hover { 
+  background: #1b64da !important; 
+  background-color: #1b64da !important; 
+  color: #ffffff !important; 
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is(
+  #btn-fetch-suno,
+  #btn-enqueue-full-master,
+  #btn-play-section,
+  #btn-start-batch,
+  #btn-import-playlist-run,
+  #btn-batch-download-zip,
+  .btn-toss-primary,
+  .ws-primary,
+  #btn-instant-master-step2,
+  #btn-export-speed-audio,
+  #btn-export-hub-toggle
+) * { 
+  color: #ffffff !important; 
+}
+
+/* YOUTUBE DEDICATED ACTION BUTTONS: TOSS RED */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is(.btn-yt-view, .btn-yt-download, #btn-download-yt-raw) { 
+  background: #f04452 !important; 
+  background-color: #f04452 !important; 
+  color: #ffffff !important; 
+  border: 0 !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is(.btn-yt-view, .btn-yt-download, #btn-download-yt-raw):hover { 
+  background: #d72837 !important; 
+  background-color: #d72837 !important; 
+  color: #ffffff !important; 
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is(.btn-yt-view, .btn-yt-download, #btn-download-yt-raw) * { 
+  color: #ffffff !important; 
+}
+
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is(.btn-yt-settings, #btn-yt-settings) { 
+  background: rgba(240, 68, 82, 0.15) !important; 
+  color: #ff7272 !important; 
+  border: 1px solid rgba(240, 68, 82, 0.3) !important; 
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is(.btn-yt-settings, #btn-yt-settings) * { color: #ff7272 !important; }
+
+/* INPUTS & SELECTS IN DARK MODE */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is(input[type="text"], input[type="number"], select, textarea, #yt-raw-url-input, #batch-playlist-input) { 
+  background: #121822 !important; 
+  background-color: #121822 !important; 
+  color: #ffffff !important; 
+  border: 1px solid #374659 !important; 
+  border-radius: 10px !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is(input[type="text"], input[type="number"], select, textarea, #yt-raw-url-input, #batch-playlist-input):focus { 
+  border-color: #3182f6 !important; 
+  box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.25) !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell input::placeholder { color: #728294 !important; }
+
+/* DROPZONE */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #dropzone { 
+  background: #161d28 !important; 
+  border: 1px dashed #3a4a5e !important; 
+  border-radius: 14px !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #dropzone:hover { 
+  background: #1c2635 !important; 
+  border-color: #559bff !important; 
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #dropzone > i { 
+  color: #3182f6 !important; 
+}
+
+/* ==========================================================================
+   DARK MODE: GAUGES & SLIDERS (100% VISIBLE & HIGH-CONTRAST)
+   ========================================================================== */
+/* ==========================================================================
+   DARK MODE: SLIDERS & GAUGES (HIGH CONTRAST & CLEAR TOSS BLUE TRACK)
+   ========================================================================== */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell input[type="range"] {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 100% !important;
+  height: 8px !important;
+  background: #33445c !important;
+  background-color: #33445c !important;
+  border: 1px solid #4d6382 !important;
+  border-radius: 9999px !important;
+  outline: none !important;
+  cursor: pointer !important;
+  margin: 6px 0 !important;
+}
+
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell input[type="range"]::-webkit-slider-runnable-track {
+  width: 100% !important;
+  height: 8px !important;
+  background: #33445c !important;
+  background-color: #33445c !important;
+  border: 1px solid #4d6382 !important;
+  border-radius: 9999px !important;
+  cursor: pointer !important;
+}
+
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell input[type="range"]::-moz-range-track {
+  width: 100% !important;
+  height: 8px !important;
+  background: #33445c !important;
+  background-color: #33445c !important;
+  border: 1px solid #4d6382 !important;
+  border-radius: 9999px !important;
+  cursor: pointer !important;
+}
+
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 50% !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: 4px solid #3182f6 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(49, 130, 246, 0.45) !important;
+  cursor: pointer !important;
+  margin-top: -7px !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell input[type="range"]:hover::-webkit-slider-thumb,
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell input[type="range"]:active::-webkit-slider-thumb {
+  transform: scale(1.18) !important;
+  border-color: #559bff !important;
+  box-shadow: 0 0 0 6px rgba(49, 130, 246, 0.35) !important;
+}
+
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell input[type="range"]::-moz-range-thumb {
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 50% !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: 4px solid #3182f6 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(49, 130, 246, 0.45) !important;
+  cursor: pointer !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell input[type="range"]:hover::-moz-range-thumb,
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell input[type="range"]:active::-moz-range-thumb {
+  transform: scale(1.18) !important;
+  border-color: #559bff !important;
+  box-shadow: 0 0 0 6px rgba(49, 130, 246, 0.35) !important;
+}
+
+/* ==========================================================================
+   DARK MODE: TOGGLE SWITCHES (HIGH CONTRAST & CLEAR STATE)
+   ========================================================================== */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .peer + div,
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .suno-toggle-track {
+  width: 44px !important;
+  height: 24px !important;
+  background: #2b3545 !important;
+  background-color: #2b3545 !important;
+  border: 1.5px solid #4c5e77 !important;
+  border-radius: 9999px !important;
+  position: relative !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .peer:checked + div,
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell input[type="checkbox"]:checked + div,
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .suno-toggle-checkbox:checked + .suno-toggle-track {
+  background: #3182f6 !important;
+  background-color: #3182f6 !important;
+  border-color: #1b64da !important;
+  box-shadow: 0 0 12px rgba(49, 130, 246, 0.55) !important;
+}
+
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .peer + div::after,
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .suno-toggle-knob {
+  content: "" !important;
+  position: absolute !important;
+  top: 2px !important;
+  left: 2px !important;
+  width: 17px !important;
+  height: 17px !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: none !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45) !important;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .peer:checked + div::after,
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell input[type="checkbox"]:checked + div::after,
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .suno-toggle-checkbox:checked + .suno-toggle-track .suno-toggle-knob {
+  transform: translateX(20px) !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: none !important;
+}
+
+/* ==========================================================================
+   DARK MODE: ALL PROGRESS BARS & TIMELINES (ACROSS ALL PAGES)
+   ========================================================================== */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is([id^="progress-ab-container-"], #analysis-progress-container, [id^="batch-progress-"], .daw-inset .w-full.bg-slate-900, .bg-[#181d2c], #yt-raw-progress-box > div) {
+  background: #2b3648 !important;
+  background-color: #2b3648 !important;
+  border: 1px solid #3d4d64 !important;
+  border-radius: 9999px !important;
+}
+
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is([id^="progress-ab-bar-"], #analysis-progress-bar, #active-job-bar, [id^="batch-item-bar-"]) {
+  background: linear-gradient(90deg, #3182f6 0%, #60a5fa 100%) !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 0 10px rgba(49, 130, 246, 0.45) !important;
+}
+
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #yt-raw-progress-bar {
+  background: linear-gradient(90deg, #f04452 0%, #ff6b6b 100%) !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 0 10px rgba(240, 68, 82, 0.45) !important;
+}
+
+/* ==========================================================================
+   DARK MODE: A/B COMPARISON BUTTONS
+   ========================================================================== */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ab-switch-btn {
+  background: #1e2634 !important;
+  background-color: #1e2634 !important;
+  color: #9ba8b8 !important;
+  border: 1px solid #354254 !important;
+  box-shadow: none !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ab-switch-btn:hover {
+  background: #273244 !important;
+  background-color: #273244 !important;
+  color: #ffffff !important;
+  border-color: #485a73 !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ab-switch-btn * {
+  color: inherit !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ab-switch-btn.ab-btn-active-a,
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ab-switch-btn.ab-btn-active-b {
+  background: #3182f6 !important;
+  background-color: #3182f6 !important;
+  color: #ffffff !important;
+  border: 1px solid #1b64da !important;
+  box-shadow: 0 4px 14px rgba(49, 130, 246, 0.4) !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ab-switch-btn.ab-btn-active-a *,
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .ab-switch-btn.ab-btn-active-b * {
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   DARK MODE: AI MUSIC VIDEO BUTTONS (GRID & ONE MORE THING)
+   ========================================================================== */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #btn-open-mv-modal,
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell button[onclick*="openMvStudioModal"] {
+  background: rgba(49, 130, 246, 0.16) !important;
+  background-color: rgba(49, 130, 246, 0.16) !important;
+  color: #8cb9ff !important;
+  border: 1px solid rgba(49, 130, 246, 0.4) !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25) !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #btn-open-mv-modal:hover,
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell button[onclick*="openMvStudioModal"]:hover {
+  background: rgba(49, 130, 246, 0.28) !important;
+  background-color: rgba(49, 130, 246, 0.28) !important;
+  color: #ffffff !important;
+  border-color: rgba(49, 130, 246, 0.6) !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #btn-open-mv-modal *,
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell button[onclick*="openMvStudioModal"] * {
+  color: #8cb9ff !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #btn-open-mv-modal:hover *,
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell button[onclick*="openMvStudioModal"]:hover * {
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   DARK MODE: YOUTUBE COPYRIGHT CHECK BUTTON
+   ========================================================================== */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #btn-open-copyright-check {
+  background: rgba(240, 68, 82, 0.15) !important;
+  background-color: rgba(240, 68, 82, 0.15) !important;
+  color: #ff8389 !important;
+  border: 1px solid rgba(240, 68, 82, 0.35) !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #btn-open-copyright-check:hover {
+  background: rgba(240, 68, 82, 0.25) !important;
+  background-color: rgba(240, 68, 82, 0.25) !important;
+  color: #ffffff !important;
+  border-color: rgba(240, 68, 82, 0.55) !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #btn-open-copyright-check * {
+  color: #ff8389 !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell #btn-open-copyright-check:hover * {
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   DARK MODE: DRAFT CARD EXPORT GRID BUTTONS (WAV, MP3, MP4)
+   ========================================================================== */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell button[onclick*="exportDraftAudio"],
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell button[onclick*="exportDraftMp4"] {
+  background: #1f2733 !important;
+  background-color: #1f2733 !important;
+  color: #edf2f8 !important;
+  border: 1px solid #344052 !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell button[onclick*="exportDraftAudio"]:hover,
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell button[onclick*="exportDraftMp4"]:hover {
+  background: #283344 !important;
+  background-color: #283344 !important;
+  color: #ffffff !important;
+  border-color: #485a73 !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell button[onclick*="exportDraftAudio"] *,
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell button[onclick*="exportDraftMp4"] * {
+  color: #edf2f8 !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell button[onclick*="exportDraftAudio"] i,
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell button[onclick*="exportDraftMp4"] i {
+  color: #3182f6 !important;
+}
+
+/* SPEECH BUBBLE IN DARK MODE */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .speech-bubble { 
+  background: #242c38 !important; 
+  color: #f1f4f8 !important; 
+  border: 1px solid #394656 !important;
+}
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .speech-bubble-title { color: #559bff !important; }
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell .speech-bubble-rec { color: #8bb5e8 !important; }
+
+/* ==========================================================================
+   TEXT CONTRAST IN DARK MODE (ACROSS ALL PAGES)
+   ========================================================================== */
+body.workspace-modern[data-workspace-theme="dark"] #ws-shell :is(
+  [class*="text-white"],
+  [class*="text-slate-"],
+  [class*="text-cyan-"],
+  [class*="text-teal-"],
+  [class*="text-purple-"],
+  [class*="text-indigo-"],
+  .suno-speed-title,
+  .suno-speed-track-name,
+  .suno-toggle-label
+):not(.ab-btn-active-a):not(.ab-btn-active-b):not(.btn-yt-view):not(.btn-yt-download):not(.btn-toss-primary):not(#btn-fetch-suno *):not(#btn-enqueue-full-master *):not(#btn-play-section *):not(.btn-seek-quick.active *):not(.slice-preset-btn.active *):not(.btn-fine-speed-pill.active *):not(.btn-fine-pitch-pill.active *) { 
+  color: #dbe4f0 !important; 
+}
+
+/* YOUTUBE COPYRIGHT MODAL (NO BROWN, CLEAN SLATE DARK) */
+body.workspace-modern[data-workspace-theme="dark"] #youtube-copyright-modal { color: #e5edf6; }
+body.workspace-modern[data-workspace-theme="dark"] #youtube-copyright-modal > div,
+body.workspace-modern[data-workspace-theme="dark"] #youtube-copyright-modal > div > div:first-child { background: #1b2028 !important; }
+body.workspace-modern[data-workspace-theme="dark"] #youtube-copyright-modal > div > div:last-child { background: #222a34 !important; }
+body.workspace-modern[data-workspace-theme="dark"] #youtube-copyright-modal > div > div:first-child h3,
+body.workspace-modern[data-workspace-theme="dark"] #youtube-copyright-modal #copyright-verdict-title,
+body.workspace-modern[data-workspace-theme="dark"] #youtube-copyright-modal #copyright-active-track-banner h4 { color: #f4f7fb !important; }
+body.workspace-modern[data-workspace-theme="dark"] #youtube-copyright-modal :is(.daw-card,[class*="bg-[#"],[class*="bg-black"],[class*="bg-white/"]) { 
+  background: #262d37 !important; 
+  border-color: #3a4552 !important; 
+}
+body.workspace-modern[data-workspace-theme="dark"] #youtube-copyright-modal #copyright-active-track-banner { background: #203b5e !important; }
+body.workspace-modern[data-workspace-theme="dark"] #youtube-copyright-modal :is(#copyright-verdict-box[class*="bg-amber"],#copyright-verdict-box[class*="bg-orange"],#copyright-verdict-box[class*="bg-slate"]) { 
+  background: #202734 !important; 
+  border-color: #384658 !important; 
+}
+body.workspace-modern[data-workspace-theme="dark"] #youtube-copyright-modal button[id^="tab-btn-cp-"][class*="bg-red"] { 
+  background: #314862 !important; 
+  color: #dceaff !important; 
+}
+body.workspace-modern[data-workspace-theme="dark"] #youtube-copyright-modal :is(#copyright-active-track-banner button,#btn-run-copyright-url,#btn-run-copyright-check) { 
+  background: #3182f6 !important; 
+  color: #fff !important; 
+}
+body.workspace-modern[data-workspace-theme="dark"] #youtube-copyright-modal :is(#copyright-active-track-banner button,#btn-run-copyright-url,#btn-run-copyright-check) * { color: #fff !important; }
+body.workspace-modern[data-workspace-theme="dark"] #youtube-copyright-modal :is(input[type="text"],select,#copyright-dropzone) { 
+  background: #121820 !important; 
+  color: #edf2f8 !important; 
+  border-color: #46515f !important; 
+}
+body.workspace-modern[data-workspace-theme="dark"] #youtube-copyright-modal :is([class*="text-white"],[class*="text-slate-"],[class*="text-cyan-"],[class*="text-purple-"],[class*="text-amber-"],[class*="text-red-"],#copyright-disclaimer) { 
+  color: #d4dde8 !important; 
+}
+body.workspace-modern[data-workspace-theme="dark"] #youtube-copyright-modal #copyright-verdict-box { color: #edf2f8; }

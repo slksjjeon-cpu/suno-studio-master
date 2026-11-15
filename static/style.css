@@ -1,0 +1,1703 @@
+/* ==========================================================================
+   2027 NEXT-GEN PRO STUDIO DESIGN SYSTEM (Ozone 11 / Ableton Live 12 / Linear Style)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Instrument+Serif&family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap');
+
+:root, [data-theme="1"] {
+  --bg-app: #0b0d13;
+  --bg-panel: #121620;
+  --bg-panel-header: #151a27;
+  --bg-card: #181d2c;
+  --bg-inset: #0e111a;
+  
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.12);
+  --border-active: #00d2ff;
+  
+  --theme-primary: #00d2ff;
+  --theme-primary-hover: #38bdf8;
+  --theme-primary-bg: rgba(0, 210, 255, 0.1);
+  --theme-primary-border: rgba(0, 210, 255, 0.3);
+  --theme-glow: rgba(0, 210, 255, 0.35);
+
+  --accent-cyan: #00d2ff;
+  --accent-purple: #9d4edd;
+  --accent-emerald: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-rose: #f43f5e;
+  
+  --text-main: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  
+  --radius-card: 12px;
+  --radius-btn: 8px;
+  --radius-pill: 6px;
+  --radius-inset: 8px;
+  --radius-input: 8px;
+  --radius-badge: 6px;
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-btn: none;
+  --border-width-card: 1px;
+  --card-header-weight: 700;
+  --letter-spacing-header: 0.08em;
+}
+
+/* ==========================================================================
+   THEME 2: VINTAGE ANALOG STUDIO — Warm Hardware Rack Console
+   
+   Design Language:
+   - Font: Space Grotesk (headers) + IBM Plex Mono (data/code)
+   - Shapes: Rounded-2xl (16px) super-soft corners, thick 2px borders
+   - Colors: Warm espresso/wood tones, amber/gold accents, VU-meter greens
+   - Textures: Inner shadows, hardware rack bevels, warm gradients
+   - Buttons: Tall, heavy, 3D embossed with inset shadow on active
+   ========================================================================== */
+[data-theme="2"] {
+  --bg-app: #0e0c08;
+  --bg-panel: #16130e;
+  --bg-panel-header: #1d1812;
+  --bg-card: #221d15;
+  --bg-inset: #110e0a;
+  
+  --border-subtle: rgba(245, 158, 11, 0.18);
+  --border-strong: rgba(245, 158, 11, 0.3);
+  --border-active: #f59e0b;
+  
+  --theme-primary: #f59e0b;
+  --theme-primary-hover: #fbbf24;
+  --theme-primary-bg: rgba(245, 158, 11, 0.12);
+  --theme-primary-border: rgba(245, 158, 11, 0.35);
+  --theme-glow: rgba(245, 158, 11, 0.35);
+
+  --accent-cyan: #f59e0b;
+  --accent-purple: #ea580c;
+  --accent-emerald: #84cc16;
+  
+  --text-main: #fef3c7;
+  --text-secondary: #a8956e;
+  --text-muted: #78694e;
+
+  --font-sans: 'Space Grotesk', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+  
+  --radius-card: 16px;
+  --radius-btn: 12px;
+  --radius-pill: 8px;
+  --radius-inset: 12px;
+  --radius-input: 10px;
+  --radius-badge: 8px;
+  --shadow-card: 0 6px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(245, 158, 11, 0.08);
+  --shadow-btn: 0 3px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --border-width-card: 2px;
+  --card-header-weight: 800;
+  --letter-spacing-header: 0.04em;
+}
+
+/* Theme 2: Core Structure Overrides */
+[data-theme="2"] body {
+  letter-spacing: 0.01em;
+}
+
+[data-theme="2"] .studio-nav-header {
+  background: linear-gradient(180deg, #18140d 0%, #110e08 100%) !important;
+  border-bottom: 2px solid rgba(245, 158, 11, 0.2) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="2"] #suno-step-nav-bar {
+  background: linear-gradient(180deg, #140f08 0%, #0f0c07 100%) !important;
+  border-bottom: 2px solid rgba(245, 158, 11, 0.12) !important;
+}
+
+[data-theme="2"] .daw-card {
+  border-radius: var(--radius-card) !important;
+  border-width: var(--border-width-card) !important;
+  border-color: rgba(245, 158, 11, 0.2) !important;
+  box-shadow: var(--shadow-card) !important;
+  background: linear-gradient(165deg, #1a160f 0%, #14110c 100%) !important;
+}
+
+[data-theme="2"] .daw-card:hover {
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+[data-theme="2"] .daw-card-header {
+  background: linear-gradient(135deg, #201a12 0%, #18130c 100%) !important;
+  border-bottom: 2px solid rgba(245, 158, 11, 0.15) !important;
+  border-radius: 14px 14px 0 0 !important;
+  padding: 14px 18px !important;
+}
+
+[data-theme="2"] .daw-inset {
+  border-radius: var(--radius-inset) !important;
+  border: 2px solid rgba(245, 158, 11, 0.12) !important;
+  background: linear-gradient(135deg, #130f09 0%, #0f0c07 100%) !important;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Theme 2: Step Badge — gold VU meter style */
+[data-theme="2"] .step-badge {
+  border-radius: var(--radius-badge) !important;
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  color: #1a1000 !important;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3) !important;
+  font-weight: 900 !important;
+}
+
+/* Theme 2: Buttons — 3D embossed hardware buttons */
+[data-theme="2"] button:not(.theme-switch-btn):not(.speed-preset-item):not(.slice-preset-btn):not(.btn-fine-speed-pill):not(.btn-seek-quick) {
+  border-radius: var(--radius-btn) !important;
+  box-shadow: var(--shadow-btn) !important;
+  font-family: var(--font-sans) !important;
+  text-transform: none;
+  letter-spacing: 0.02em !important;
+}
+
+[data-theme="2"] button:not(.theme-switch-btn):active {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+  transform: translateY(2px) !important;
+}
+
+/* Theme 2: Dedicated Key Action Buttons (Analog Hardware Console Style) */
+[data-theme="2"] #btn-enqueue-full-master {
+  background: linear-gradient(180deg, #f59e0b 0%, #b45309 100%) !important;
+  color: #1a1000 !important;
+  border: 2px solid #fbbf24 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 0 #78350f, 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.03em !important;
+}
+[data-theme="2"] #btn-enqueue-full-master:hover {
+  background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%) !important;
+}
+[data-theme="2"] #btn-enqueue-full-master:active {
+  box-shadow: 0 1px 0 #78350f, inset 0 2px 6px rgba(0, 0, 0, 0.6) !important;
+  transform: translateY(3px) !important;
+}
+
+[data-theme="2"] #btn-fetch-suno {
+  background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%) !important;
+  color: #1a1000 !important;
+  border: 2px solid #fbbf24 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 3px 0 #78350f !important;
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 800 !important;
+}
+[data-theme="2"] #btn-fetch-suno:active {
+  box-shadow: 0 1px 0 #78350f, inset 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+  transform: translateY(2px) !important;
+}
+
+[data-theme="2"] #btn-play-section {
+  background: linear-gradient(180deg, #d97706 0%, #92400e 100%) !important;
+  color: #fffbeb !important;
+  border: 2px solid #f59e0b !important;
+  border-radius: 10px !important;
+  box-shadow: 0 3px 0 #451a03 !important;
+  font-weight: 700 !important;
+}
+[data-theme="2"] #btn-play-section:active {
+  box-shadow: 0 1px 0 #451a03, inset 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+  transform: translateY(2px) !important;
+}
+
+[data-theme="2"] #btn-goto-step-3 {
+  background: #1c170f !important;
+  border: 2px solid rgba(245, 158, 11, 0.4) !important;
+  color: #fbbf24 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 3px 0 #0d0a06 !important;
+  font-weight: 700 !important;
+}
+[data-theme="2"] #btn-goto-step-3:hover {
+  background: #241e14 !important;
+  border-color: #f59e0b !important;
+}
+
+[data-theme="2"] #btn-enqueue-preview {
+  background: #17130b !important;
+  border: 2px solid rgba(245, 158, 11, 0.3) !important;
+  color: #fbbf24 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 3px 0 #0d0a06 !important;
+  font-weight: 700 !important;
+}
+
+/* Theme 2: Speed Card Actions & Export Buttons */
+[data-theme="2"] #btn-export-speed-audio {
+  background: #1e1910 !important;
+  border: 2px solid #f59e0b !important;
+  color: #fbbf24 !important;
+  box-shadow: 0 3px 0 #78350f !important;
+}
+[data-theme="2"] #btn-export-speed-mp3 {
+  background: #231b0e !important;
+  border: 2px solid #fbbf24 !important;
+  color: #fde68a !important;
+  box-shadow: 0 3px 0 #78350f !important;
+}
+[data-theme="2"] #btn-export-speed-mp4 {
+  background: #1b2333 !important;
+  border: 1px solid rgba(49, 130, 246, 0.35) !important;
+  color: #e4e4e7 !important;
+  box-shadow: none !important;
+}
+body:not(.workspace-modern)[data-theme="2"] #btn-open-mv-modal {
+  background: rgba(49, 130, 246, 0.16) !important;
+  border: 1px solid rgba(49, 130, 246, 0.45) !important;
+  color: #70a9ff !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+/* Theme 2: Draft Card Export Grid Buttons (Classic mode only) */
+body:not(.workspace-modern)[data-theme="2"] button[onclick*="exportDraftAudio"][onclick*="'wav'"] {
+  background: #1b2333 !important;
+  border: 1px solid rgba(49, 130, 246, 0.35) !important;
+  color: #93c5fd !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+body:not(.workspace-modern)[data-theme="2"] button[onclick*="exportDraftAudio"][onclick*="'mp3'"] {
+  background: #1b2333 !important;
+  border: 1px solid rgba(49, 130, 246, 0.35) !important;
+  color: #93c5fd !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+body:not(.workspace-modern)[data-theme="2"] button[onclick*="exportDraftMp4"] {
+  background: #1b2333 !important;
+  border: 1px solid rgba(49, 130, 246, 0.35) !important;
+  color: #93c5fd !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+body:not(.workspace-modern)[data-theme="2"] button[onclick*="openMvStudioModal"] {
+  background: rgba(49, 130, 246, 0.16) !important;
+  border: 1px solid rgba(49, 130, 246, 0.45) !important;
+  color: #70a9ff !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+/* Theme 2: Heading Typography */
+[data-theme="2"] h1,
+[data-theme="2"] h2,
+[data-theme="2"] h3,
+[data-theme="2"] .suno-speed-title,
+[data-theme="2"] .daw-card-header h2 {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* Theme 2: Inputs — warm wood panel style */
+[data-theme="2"] input[type="text"],
+[data-theme="2"] select {
+  border-radius: var(--radius-input) !important;
+  border: 2px solid rgba(245, 158, 11, 0.2) !important;
+  background: #0f0c07 !important;
+  color: #fef3c7 !important;
+  font-family: var(--font-mono) !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+[data-theme="2"] input[type="text"]:focus,
+[data-theme="2"] select:focus {
+  border-color: #f59e0b !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 12px rgba(245, 158, 11, 0.2) !important;
+}
+
+/* Theme 2: Range sliders — warm amber track */
+[data-theme="2"] input[type=range] {
+  background: linear-gradient(90deg, #2a1f0f, #1a1408) !important;
+  height: 6px !important;
+  border-radius: 3px !important;
+}
+[data-theme="2"] input[type=range]::-webkit-slider-thumb {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  border: 2px solid #fbbf24 !important;
+  width: 16px !important;
+  height: 16px !important;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4), 0 0 0 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Theme 2: Preset pills — chunky hardware switch style */
+[data-theme="2"] .preset-pill,
+[data-theme="2"] .btn-fine-speed-pill,
+[data-theme="2"] .btn-seek-quick,
+[data-theme="2"] .slice-preset-btn {
+  border-radius: 8px !important;
+  border: 2px solid rgba(245, 158, 11, 0.2) !important;
+  background: #1a1509 !important;
+  color: #a8956e !important;
+  font-family: var(--font-mono) !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3) !important;
+}
+[data-theme="2"] .preset-pill:hover,
+[data-theme="2"] .btn-fine-speed-pill:hover,
+[data-theme="2"] .btn-seek-quick:hover,
+[data-theme="2"] .slice-preset-btn:hover {
+  color: #fbbf24 !important;
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  background: rgba(245, 158, 11, 0.12) !important;
+}
+
+/* Theme 2: Speed card — vintage VU panel */
+[data-theme="2"] .suno-speed-card {
+  background: linear-gradient(170deg, #1e1910 0%, #15110b 100%) !important;
+  border: 2px solid rgba(245, 158, 11, 0.25) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(245, 158, 11, 0.06) !important;
+}
+
+[data-theme="2"] .suno-speed-val-display {
+  color: #fbbf24 !important;
+  font-family: 'Space Grotesk', sans-serif !important;
+  text-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+}
+
+[data-theme="2"] .suno-speed-slider::-webkit-slider-thumb {
+  border-color: #f59e0b !important;
+  background: linear-gradient(135deg, #f59e0b, #b45309) !important;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.5) !important;
+}
+
+[data-theme="2"] .suno-speed-slider {
+  background: linear-gradient(90deg, #2a1f0f, #1a1408) !important;
+  height: 6px !important;
+}
+
+/* Theme 2: Color overrides for Tailwind utility classes */
+[data-theme="2"] .text-cyan-400,
+[data-theme="2"] .text-cyan-300 {
+  color: #fbbf24 !important;
+}
+
+[data-theme="2"] .border-cyan-500\/30,
+[data-theme="2"] .border-cyan-500\/20,
+[data-theme="2"] .border-cyan-500\/40,
+[data-theme="2"] .border-cyan-500\/50 {
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+[data-theme="2"] .bg-cyan-500\/10,
+[data-theme="2"] .bg-cyan-500\/20,
+[data-theme="2"] .bg-cyan-950\/40 {
+  background-color: rgba(245, 158, 11, 0.12) !important;
+}
+
+[data-theme="2"] .step-active {
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  box-shadow: 0 6px 32px rgba(245, 158, 11, 0.15), inset 0 1px 0 rgba(245, 158, 11, 0.08) !important;
+}
+
+/* Theme 2: Waveform — warm amber tint */
+[data-theme="2"] .waveform-container-pro {
+  background: #0c0a06 !important;
+  border: 2px solid rgba(245, 158, 11, 0.15) !important;
+  border-radius: 12px !important;
+}
+
+[data-theme="2"] .selection-overlay-pro {
+  background: rgba(245, 158, 11, 0.15) !important;
+  border-left: 2px solid #f59e0b !important;
+  border-right: 2px solid #f59e0b !important;
+}
+
+[data-theme="2"] .playhead-pro {
+  background: #ef4444 !important;
+  box-shadow: 0 0 8px #ef4444 !important;
+}
+
+/* Theme 2: Dropzone — leather-style */
+[data-theme="2"] #dropzone {
+  border-radius: 12px !important;
+  border: 2px dashed rgba(245, 158, 11, 0.3) !important;
+  background: linear-gradient(135deg, #12100a 0%, #0e0c07 100%) !important;
+}
+[data-theme="2"] #dropzone:hover {
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  background: linear-gradient(135deg, #181409 0%, #14110a 100%) !important;
+}
+
+/* Theme 2: Draft cards — hardware module rack (Classic mode only) */
+body:not(.workspace-modern)[data-theme="2"] .draft-card-pro {
+  background: linear-gradient(165deg, #201b12 0%, #16120c 100%) !important;
+  border: 2px solid rgba(245, 158, 11, 0.18) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(245, 158, 11, 0.06) !important;
+}
+body:not(.workspace-modern)[data-theme="2"] .draft-card-pro:hover {
+  border-color: rgba(245, 158, 11, 0.4) !important;
+}
+
+/* Theme 2: Toggle — warm mechanical switch (Classic mode only) */
+body:not(.workspace-modern)[data-theme="2"] .suno-toggle-track {
+  background-color: #2a1f0f !important;
+}
+body:not(.workspace-modern)[data-theme="2"] .suno-toggle-checkbox:checked + .suno-toggle-track {
+  background-color: #f59e0b !important;
+}
+body:not(.workspace-modern)[data-theme="2"] .suno-toggle-checkbox:checked + .suno-toggle-track .suno-toggle-knob {
+  background-color: #1a1000 !important;
+  border: 2px solid #fbbf24 !important;
+}
+
+/* Theme 2: Mode pills */
+[data-theme="2"] .mode-pill-btn {
+  border-radius: 10px !important;
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 700 !important;
+}
+[data-theme="2"] .mode-pill-btn.active {
+  color: #fbbf24 !important;
+  background: rgba(245, 158, 11, 0.15) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+/* Theme 2: Speech bubbles — parchment tooltip */
+[data-theme="2"] .speech-bubble {
+  background: rgba(26, 21, 12, 0.97) !important;
+  border: 2px solid rgba(245, 158, 11, 0.4) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 16px rgba(245, 158, 11, 0.1) !important;
+}
+[data-theme="2"] .speech-bubble::after {
+  border-color: rgba(245, 158, 11, 0.4) transparent transparent transparent !important;
+}
+[data-theme="2"] .speech-bubble-title {
+  color: #fbbf24 !important;
+}
+[data-theme="2"] .speech-bubble-rec {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+  color: #fbbf24 !important;
+}
+
+/* Theme 2: Scrollbar — warm tones */
+[data-theme="2"] ::-webkit-scrollbar-thumb {
+  background: #2a1f0f !important;
+}
+[data-theme="2"] ::-webkit-scrollbar-thumb:hover {
+  background: #3d2e16 !important;
+}
+
+/* Theme 2: MV Style Cards */
+[data-theme="2"] .mv-style-card:hover {
+  border-color: rgba(245, 158, 11, 0.4) !important;
+}
+[data-theme="2"] .mv-style-card.active {
+  background: linear-gradient(135deg, rgba(50, 35, 10, 0.65), rgba(26, 18, 8, 0.85)) !important;
+  border-color: #f59e0b !important;
+  box-shadow: 0 4px 16px -2px rgba(245, 158, 11, 0.25) !important;
+}
+[data-theme="2"] .mv-style-card.active::after {
+  background: #f59e0b !important;
+  color: #1a1000 !important;
+}
+
+
+/* ==========================================================================
+   THEME 3: GLASSMORPHISM AURORA — Frosted Glass & Floating Neon Mint
+   
+   Design Language:
+   - Font: Inter (headers, ultra-clean geometric) + DM Sans (body)
+   - Shapes: Rounded-3xl (24px) pill/capsule shapes, ultra-soft edges
+   - Colors: Deep space black + frosted glass panels + emerald/mint/aurora gradients
+   - Textures: backdrop-blur, translucent panels, floating shadows, light ring borders
+   - Buttons: Pill-shaped capsules, no hard edges, gentle gradient fills
+   ========================================================================== */
+[data-theme="3"] {
+  --bg-app: #050808;
+  --bg-panel: rgba(12, 20, 18, 0.75);
+  --bg-panel-header: rgba(16, 28, 24, 0.8);
+  --bg-card: rgba(18, 32, 28, 0.65);
+  --bg-inset: rgba(8, 14, 12, 0.6);
+  
+  --border-subtle: rgba(52, 211, 153, 0.1);
+  --border-strong: rgba(52, 211, 153, 0.18);
+  --border-active: #34d399;
+  
+  --theme-primary: #34d399;
+  --theme-primary-hover: #6ee7b7;
+  --theme-primary-bg: rgba(52, 211, 153, 0.1);
+  --theme-primary-border: rgba(52, 211, 153, 0.25);
+  --theme-glow: rgba(52, 211, 153, 0.25);
+
+  --accent-cyan: #34d399;
+  --accent-purple: #a78bfa;
+  --accent-emerald: #6ee7b7;
+  
+  --text-main: #ecfdf5;
+  --text-secondary: #86a99a;
+  --text-muted: #5a7a6c;
+
+  --font-sans: 'Inter', 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'DM Sans', 'JetBrains Mono', monospace;
+  
+  --radius-card: 24px;
+  --radius-btn: 9999px;
+  --radius-pill: 9999px;
+  --radius-inset: 16px;
+  --radius-input: 14px;
+  --radius-badge: 9999px;
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(52, 211, 153, 0.06);
+  --shadow-btn: 0 4px 14px rgba(52, 211, 153, 0.12);
+  --border-width-card: 1px;
+  --card-header-weight: 600;
+  --letter-spacing-header: -0.01em;
+}
+
+/* Theme 3: Core Structure — Frosted glass panels */
+[data-theme="3"] body {
+  letter-spacing: -0.01em;
+  background-image: 
+    radial-gradient(ellipse at 15% 20%, rgba(52, 211, 153, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 85% 80%, rgba(167, 139, 250, 0.03) 0%, transparent 60%) !important;
+}
+
+[data-theme="3"] .studio-nav-header {
+  background: rgba(8, 14, 12, 0.85) !important;
+  border-bottom: 1px solid rgba(52, 211, 153, 0.1) !important;
+  backdrop-filter: blur(20px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.5) !important;
+}
+
+[data-theme="3"] #suno-step-nav-bar {
+  background: rgba(6, 10, 9, 0.8) !important;
+  border-bottom: 1px solid rgba(52, 211, 153, 0.08) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+
+[data-theme="3"] .daw-card {
+  border-radius: var(--radius-card) !important;
+  border: 1px solid rgba(52, 211, 153, 0.1) !important;
+  box-shadow: var(--shadow-card) !important;
+  background: rgba(10, 18, 16, 0.7) !important;
+  backdrop-filter: blur(12px) saturate(1.3) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(1.3) !important;
+}
+
+[data-theme="3"] .daw-card:hover {
+  border-color: rgba(52, 211, 153, 0.2) !important;
+}
+
+[data-theme="3"] .daw-card-header {
+  background: rgba(14, 24, 20, 0.6) !important;
+  border-bottom: 1px solid rgba(52, 211, 153, 0.08) !important;
+  border-radius: 23px 23px 0 0 !important;
+  padding: 14px 20px !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+[data-theme="3"] .daw-inset {
+  border-radius: var(--radius-inset) !important;
+  border: 1px solid rgba(52, 211, 153, 0.08) !important;
+  background: rgba(8, 14, 12, 0.5) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+/* Theme 3: Step Badge — aurora pill */
+[data-theme="3"] .step-badge {
+  border-radius: 9999px !important;
+  background: linear-gradient(135deg, #34d399, #6ee7b7) !important;
+  color: #022c22 !important;
+  box-shadow: 0 2px 8px rgba(52, 211, 153, 0.25) !important;
+  font-weight: 700 !important;
+}
+
+/* Theme 3: Buttons — pill capsules with subtle glow */
+[data-theme="3"] button:not(.theme-switch-btn):not(.speed-preset-item):not(.slice-preset-btn):not(.btn-fine-speed-pill):not(.btn-seek-quick) {
+  border-radius: 9999px !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+[data-theme="3"] button:not(.theme-switch-btn):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(52, 211, 153, 0.15) !important;
+}
+
+[data-theme="3"] button:not(.theme-switch-btn):active {
+  transform: translateY(0px) scale(0.98);
+}
+
+/* Theme 3: Dedicated Key Action Buttons (Floating Pill Capsule & Aurora Glow) */
+[data-theme="3"] #btn-enqueue-full-master {
+  background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%) !important;
+  color: #022c22 !important;
+  border-radius: 9999px !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 0 28px rgba(16, 185, 129, 0.35), 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.01em !important;
+}
+[data-theme="3"] #btn-enqueue-full-master:hover {
+  background: linear-gradient(135deg, #34d399 0%, #22d3ee 100%) !important;
+  box-shadow: 0 0 36px rgba(16, 185, 129, 0.5), 0 8px 28px rgba(0, 0, 0, 0.5) !important;
+  transform: translateY(-2px);
+}
+
+[data-theme="3"] #btn-fetch-suno {
+  background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%) !important;
+  color: #022c22 !important;
+  border-radius: 9999px !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.3) !important;
+  font-weight: 800 !important;
+}
+
+[data-theme="3"] #btn-play-section {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: #022c22 !important;
+  border-radius: 9999px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25) !important;
+}
+
+[data-theme="3"] #btn-goto-step-3 {
+  background: rgba(16, 185, 129, 0.1) !important;
+  border: 1px solid rgba(52, 211, 153, 0.3) !important;
+  color: #6ee7b7 !important;
+  border-radius: 9999px !important;
+  font-weight: 700 !important;
+  backdrop-filter: blur(8px) !important;
+}
+[data-theme="3"] #btn-goto-step-3:hover {
+  background: rgba(16, 185, 129, 0.2) !important;
+  border-color: #34d399 !important;
+}
+
+[data-theme="3"] #btn-enqueue-preview {
+  background: rgba(16, 185, 129, 0.08) !important;
+  border: 1px solid rgba(52, 211, 153, 0.25) !important;
+  color: #6ee7b7 !important;
+  border-radius: 9999px !important;
+  font-weight: 700 !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* Theme 3: Speed Card Actions & Export Buttons */
+[data-theme="3"] #btn-export-speed-audio {
+  border-radius: 9999px !important;
+  background: rgba(20, 184, 166, 0.2) !important;
+  border: 1px solid rgba(45, 212, 191, 0.4) !important;
+  color: #5eead4 !important;
+  box-shadow: 0 4px 14px rgba(45, 212, 191, 0.2) !important;
+}
+[data-theme="3"] #btn-export-speed-mp3 {
+  border-radius: 9999px !important;
+  background: rgba(245, 158, 11, 0.2) !important;
+  border: 1px solid rgba(251, 191, 36, 0.4) !important;
+  color: #fde68a !important;
+  box-shadow: 0 4px 14px rgba(251, 191, 36, 0.2) !important;
+}
+[data-theme="3"] #btn-export-speed-mp4 {
+  border-radius: 9999px !important;
+  background: rgba(6, 182, 212, 0.15) !important;
+  border: 1px solid rgba(34, 211, 238, 0.35) !important;
+  color: #67e8f9 !important;
+  box-shadow: 0 4px 14px rgba(34, 211, 238, 0.2) !important;
+}
+[data-theme="3"] #btn-open-mv-modal {
+  border-radius: 9999px !important;
+  box-shadow: 0 4px 20px rgba(236, 72, 153, 0.3) !important;
+}
+
+/* Theme 3: Draft Card Export Grid Buttons (All Pill Capsules) */
+[data-theme="3"] button[onclick*="exportDraftAudio"][onclick*="'wav'"] {
+  border-radius: 9999px !important;
+  background: rgba(20, 184, 166, 0.15) !important;
+  border: 1px solid rgba(45, 212, 191, 0.35) !important;
+  color: #5eead4 !important;
+  backdrop-filter: blur(8px) !important;
+}
+[data-theme="3"] button[onclick*="exportDraftAudio"][onclick*="'mp3'"] {
+  border-radius: 9999px !important;
+  background: rgba(245, 158, 11, 0.15) !important;
+  border: 1px solid rgba(251, 191, 36, 0.35) !important;
+  color: #fde68a !important;
+  backdrop-filter: blur(8px) !important;
+}
+[data-theme="3"] button[onclick*="exportDraftMp4"] {
+  border-radius: 9999px !important;
+  background: rgba(6, 182, 212, 0.15) !important;
+  border: 1px solid rgba(34, 211, 238, 0.35) !important;
+  color: #67e8f9 !important;
+  backdrop-filter: blur(8px) !important;
+}
+[data-theme="3"] button[onclick*="openMvStudioModal"] {
+  border-radius: 9999px !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* Theme 3: Typography */
+[data-theme="3"] h1,
+[data-theme="3"] h2,
+[data-theme="3"] h3,
+[data-theme="3"] .suno-speed-title,
+[data-theme="3"] .daw-card-header h2 {
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+}
+
+/* Theme 3: Inputs — frosted glass fields */
+[data-theme="3"] input[type="text"],
+[data-theme="3"] select {
+  border-radius: var(--radius-input) !important;
+  border: 1px solid rgba(52, 211, 153, 0.12) !important;
+  background: rgba(6, 12, 10, 0.6) !important;
+  color: #ecfdf5 !important;
+  font-family: 'Inter', sans-serif !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+[data-theme="3"] input[type="text"]:focus,
+[data-theme="3"] select:focus {
+  border-color: rgba(52, 211, 153, 0.3) !important;
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.08), 0 0 16px rgba(52, 211, 153, 0.1) !important;
+}
+
+/* Theme 3: Range sliders — minimal glass track */
+[data-theme="3"] input[type=range] {
+  background: rgba(52, 211, 153, 0.08) !important;
+  height: 3px !important;
+  border-radius: 9999px !important;
+}
+[data-theme="3"] input[type=range]::-webkit-slider-thumb {
+  background: #34d399 !important;
+  border: none !important;
+  width: 12px !important;
+  height: 12px !important;
+  border-radius: 50% !important;
+  box-shadow: 0 0 12px rgba(52, 211, 153, 0.4), 0 0 0 4px rgba(52, 211, 153, 0.1) !important;
+}
+
+/* Theme 3: Preset pills — floating glass capsules */
+[data-theme="3"] .preset-pill,
+[data-theme="3"] .btn-fine-speed-pill,
+[data-theme="3"] .btn-seek-quick,
+[data-theme="3"] .slice-preset-btn {
+  border-radius: 9999px !important;
+  border: 1px solid rgba(52, 211, 153, 0.1) !important;
+  background: rgba(52, 211, 153, 0.06) !important;
+  color: #86a99a !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 500 !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+}
+[data-theme="3"] .preset-pill:hover,
+[data-theme="3"] .btn-fine-speed-pill:hover,
+[data-theme="3"] .btn-seek-quick:hover,
+[data-theme="3"] .slice-preset-btn:hover {
+  color: #6ee7b7 !important;
+  border-color: rgba(52, 211, 153, 0.25) !important;
+  background: rgba(52, 211, 153, 0.12) !important;
+}
+
+/* Theme 3: Speed card — floating glass panel */
+[data-theme="3"] .suno-speed-card {
+  background: rgba(10, 20, 16, 0.65) !important;
+  border: 1px solid rgba(52, 211, 153, 0.12) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(52, 211, 153, 0.04) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+[data-theme="3"] .suno-speed-val-display {
+  color: #6ee7b7 !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 900 !important;
+  text-shadow: 0 0 24px rgba(52, 211, 153, 0.2);
+}
+
+[data-theme="3"] .suno-speed-slider::-webkit-slider-thumb {
+  border: none !important;
+  background: #34d399 !important;
+  width: 20px !important;
+  height: 20px !important;
+  box-shadow: 0 0 16px rgba(52, 211, 153, 0.4), 0 0 0 4px rgba(52, 211, 153, 0.1) !important;
+}
+
+[data-theme="3"] .suno-speed-slider {
+  background: rgba(52, 211, 153, 0.1) !important;
+  height: 4px !important;
+}
+
+/* Theme 3: Color overrides for Tailwind utility classes */
+[data-theme="3"] .text-cyan-400,
+[data-theme="3"] .text-cyan-300 {
+  color: #6ee7b7 !important;
+}
+
+[data-theme="3"] .border-cyan-500\/30,
+[data-theme="3"] .border-cyan-500\/20,
+[data-theme="3"] .border-cyan-500\/40,
+[data-theme="3"] .border-cyan-500\/50 {
+  border-color: rgba(52, 211, 153, 0.2) !important;
+}
+
+[data-theme="3"] .bg-cyan-500\/10,
+[data-theme="3"] .bg-cyan-500\/20,
+[data-theme="3"] .bg-cyan-950\/40 {
+  background-color: rgba(52, 211, 153, 0.08) !important;
+}
+
+[data-theme="3"] .step-active {
+  border-color: rgba(52, 211, 153, 0.3) !important;
+  box-shadow: 0 8px 32px rgba(52, 211, 153, 0.1), 0 0 0 1px rgba(52, 211, 153, 0.08) !important;
+}
+
+/* Theme 3: Waveform — minimal glass */
+[data-theme="3"] .waveform-container-pro {
+  background: rgba(5, 10, 8, 0.6) !important;
+  border: 1px solid rgba(52, 211, 153, 0.1) !important;
+  border-radius: 16px !important;
+}
+
+[data-theme="3"] .selection-overlay-pro {
+  background: rgba(52, 211, 153, 0.12) !important;
+  border-left: 1px solid rgba(52, 211, 153, 0.5) !important;
+  border-right: 1px solid rgba(52, 211, 153, 0.5) !important;
+}
+
+[data-theme="3"] .playhead-pro {
+  background: #fb7185 !important;
+  box-shadow: 0 0 10px rgba(251, 113, 133, 0.5) !important;
+}
+
+/* Theme 3: Dropzone — frosted upload zone */
+[data-theme="3"] #dropzone {
+  border-radius: 20px !important;
+  border: 1px dashed rgba(52, 211, 153, 0.2) !important;
+  background: rgba(8, 16, 13, 0.5) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+[data-theme="3"] #dropzone:hover {
+  border-color: rgba(52, 211, 153, 0.35) !important;
+  background: rgba(12, 22, 18, 0.6) !important;
+}
+
+/* Theme 3: Draft cards — floating glass card */
+[data-theme="3"] .draft-card-pro {
+  background: rgba(12, 22, 18, 0.6) !important;
+  border: 1px solid rgba(52, 211, 153, 0.1) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+[data-theme="3"] .draft-card-pro:hover {
+  border-color: rgba(52, 211, 153, 0.25) !important;
+  box-shadow: 0 8px 32px rgba(52, 211, 153, 0.08) !important;
+}
+
+/* Theme 3: Toggle — glowing orb switch */
+[data-theme="3"] .suno-toggle-track {
+  background-color: rgba(52, 211, 153, 0.1) !important;
+  border-radius: 9999px !important;
+}
+[data-theme="3"] .suno-toggle-checkbox:checked + .suno-toggle-track {
+  background-color: rgba(52, 211, 153, 0.25) !important;
+}
+[data-theme="3"] .suno-toggle-knob {
+  background-color: #5a7a6c !important;
+}
+[data-theme="3"] .suno-toggle-checkbox:checked + .suno-toggle-track .suno-toggle-knob {
+  background-color: #34d399 !important;
+  border: none !important;
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.4) !important;
+}
+
+/* Theme 3: Mode pills — aurora glass pills */
+[data-theme="3"] .mode-pill-btn {
+  border-radius: 9999px !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 600 !important;
+}
+[data-theme="3"] .mode-pill-btn.active {
+  color: #6ee7b7 !important;
+  background: rgba(52, 211, 153, 0.1) !important;
+  border-color: rgba(52, 211, 153, 0.2) !important;
+}
+
+/* Theme 3: Speech bubbles — frosted glass tooltip */
+[data-theme="3"] .speech-bubble {
+  background: rgba(8, 16, 14, 0.92) !important;
+  border: 1px solid rgba(52, 211, 153, 0.2) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(52, 211, 153, 0.05) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+[data-theme="3"] .speech-bubble::after {
+  border-color: rgba(52, 211, 153, 0.2) transparent transparent transparent !important;
+}
+[data-theme="3"] .speech-bubble-title {
+  color: #6ee7b7 !important;
+}
+[data-theme="3"] .speech-bubble-rec {
+  background: rgba(52, 211, 153, 0.08) !important;
+  border: 1px solid rgba(52, 211, 153, 0.15) !important;
+  color: #6ee7b7 !important;
+  border-radius: 9999px !important;
+}
+
+/* Theme 3: Scrollbar — minimal */
+[data-theme="3"] ::-webkit-scrollbar-thumb {
+  background: rgba(52, 211, 153, 0.12) !important;
+  border-radius: 9999px !important;
+}
+[data-theme="3"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(52, 211, 153, 0.2) !important;
+}
+
+/* Theme 3: MV Style Cards */
+[data-theme="3"] .mv-style-card:hover {
+  border-color: rgba(52, 211, 153, 0.25) !important;
+}
+[data-theme="3"] .mv-style-card.active {
+  background: rgba(12, 30, 24, 0.7) !important;
+  border-color: rgba(52, 211, 153, 0.35) !important;
+  box-shadow: 0 4px 20px rgba(52, 211, 153, 0.15) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+[data-theme="3"] .mv-style-card.active::after {
+  background: #34d399 !important;
+  color: #022c22 !important;
+}
+
+/* Theme 3: A/B buttons — aurora neon (Classic mode only) */
+body:not(.workspace-modern)[data-theme="3"] .ab-btn-active-a {
+  background: linear-gradient(135deg, #0d9488, #14b8a6) !important;
+  box-shadow: 0 0 20px rgba(20, 184, 166, 0.3) !important;
+  border-color: #5eead4 !important;
+}
+body:not(.workspace-modern)[data-theme="3"] .ab-btn-active-b {
+  background: #3182f6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(49, 130, 246, 0.4) !important;
+  border-color: #1b64da !important;
+}
+
+
+/* ==========================================================================
+   UI THEME SWITCHER BUTTONS (1, 2, 3)
+   ========================================================================== */
+.theme-switch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.theme-switch-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.theme-switch-btn.active {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+/* Theme 2: Theme switcher button style override */
+[data-theme="2"] .theme-switch-btn {
+  border-radius: 10px;
+  font-family: 'Space Grotesk', sans-serif;
+}
+[data-theme="2"] .theme-switch-btn.active {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3), 0 2px 8px rgba(245, 158, 11, 0.15);
+}
+
+/* Theme 3: Theme switcher button style override */
+[data-theme="3"] .theme-switch-btn {
+  border-radius: 9999px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+}
+[data-theme="3"] .theme-switch-btn.active {
+  background: rgba(52, 211, 153, 0.1);
+  border-color: rgba(52, 211, 153, 0.2);
+  box-shadow: 0 4px 14px rgba(52, 211, 153, 0.1);
+}
+
+/* Theme 3: UI Theme Switcher container */
+[data-theme="3"] #ui-theme-switcher {
+  border-radius: 9999px !important;
+  background: rgba(8, 16, 14, 0.6) !important;
+  border: 1px solid rgba(52, 211, 153, 0.1) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+/* Theme 2: UI Theme Switcher container */
+[data-theme="2"] #ui-theme-switcher {
+  border-radius: 12px !important;
+  background: #110e08 !important;
+  border: 2px solid rgba(245, 158, 11, 0.15) !important;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  letter-spacing: -0.01em;
+  transition: background-color 0.3s ease, color 0.3s ease, font-family 0.15s ease;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #252c3f;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3b4763;
+}
+
+/* Top Navigation Bar */
+.studio-nav-header {
+  background: #0f131c;
+  border-bottom: 1px solid var(--border-subtle);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Mode Switch Tabs */
+.mode-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: var(--radius-btn, 8px);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #8b9bb4);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: var(--font-sans);
+}
+.mode-pill-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+.mode-pill-btn.active {
+  color: #00d2ff;
+  background: rgba(0, 210, 255, 0.1);
+  border-color: rgba(0, 210, 255, 0.3);
+}
+.mode-pill-btn.hum-active {
+  color: #2dd4bf;
+  background: rgba(45, 212, 191, 0.1);
+  border-color: rgba(45, 212, 191, 0.3);
+}
+
+/* DAW Rack Panels */
+.daw-card {
+  background: var(--bg-panel);
+  border: var(--border-width-card, 1px) solid var(--border-subtle);
+  border-radius: var(--radius-card, 12px);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.3s ease, border-radius 0.3s ease;
+}
+.daw-card:hover {
+  border-color: var(--border-strong);
+}
+
+.daw-card-header {
+  background: var(--bg-panel-header);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 12px 16px;
+  border-top-left-radius: calc(var(--radius-card, 12px) - 1px);
+  border-top-right-radius: calc(var(--radius-card, 12px) - 1px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.3s ease, border-radius 0.3s ease;
+}
+
+.step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-badge, 6px);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: var(--card-header-weight, 700);
+  transition: border-radius 0.3s ease, background 0.3s ease;
+}
+
+/* Dimmed / Active States */
+.step-dimmed {
+  opacity: 0.35;
+  pointer-events: none;
+  filter: grayscale(40%);
+  user-select: none;
+  transition: all 0.25s ease;
+}
+.step-completed-dimmed {
+  opacity: 0.45;
+  filter: grayscale(85%) contrast(0.95);
+  border-color: rgba(255, 255, 255, 0.06) !important;
+  transition: opacity 0.3s ease, filter 0.3s ease, border-color 0.3s ease;
+  pointer-events: auto;
+}
+.step-completed-dimmed:hover {
+  opacity: 0.88;
+  filter: grayscale(15%) contrast(1.0);
+}
+.step-active {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  filter: none !important;
+  border-color: var(--border-active, rgba(0, 210, 255, 0.5)) !important;
+  box-shadow: 0 4px 28px var(--theme-glow, rgba(0, 210, 255, 0.12)) !important;
+}
+
+/* Control Insets */
+.daw-inset {
+  background: var(--bg-inset);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-inset, 8px);
+  padding: 12px;
+  transition: background 0.3s ease, border-radius 0.3s ease, border-color 0.3s ease;
+}
+
+/* Precision Sliders */
+input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: #232b3e;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+input[type=range]:hover {
+  background: #2e3952;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--theme-primary, #00d2ff);
+  box-shadow: 0 0 8px var(--theme-glow, rgba(0, 210, 255, 0.5));
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.3s ease;
+}
+input[type=range]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* Waveform Canvas Container */
+.waveform-container-pro {
+  position: relative;
+  background: #080a10;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-inset, 8px);
+  overflow: hidden;
+  height: 110px;
+  transition: background 0.3s ease, border-radius 0.3s ease, border-color 0.3s ease;
+}
+
+.selection-overlay-pro {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(0, 210, 255, 0.18);
+  border-left: 2px solid #00d2ff;
+  border-right: 2px solid #00d2ff;
+  pointer-events: none;
+}
+
+.playhead-pro {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #ff3366;
+  box-shadow: 0 0 8px #ff3366;
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* Draft Cards */
+.draft-card-pro {
+  background: var(--bg-card);
+  border: var(--border-width-card, 1px) solid var(--border-subtle);
+  border-radius: var(--radius-card, 10px);
+  padding: 14px;
+  transition: all 0.2s ease;
+}
+.draft-card-pro:hover {
+  border-color: rgba(0, 210, 255, 0.3);
+  box-shadow: var(--shadow-card, 0 4px 16px rgba(0, 0, 0, 0.4));
+}
+
+/* Preset Pills */
+.preset-pill {
+  padding: 4px 10px;
+  border-radius: var(--radius-pill, 6px);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  background: #181f2e;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary, #94a3b8);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.preset-pill:hover {
+  color: #2dd4bf;
+  border-color: #2dd4bf;
+  background: rgba(45, 212, 191, 0.1);
+}
+
+/* Speech Bubble / Tooltip System for Precision EQ */
+.has-speech-bubble {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: help;
+}
+
+.speech-bubble {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  width: 270px;
+  background: rgba(14, 18, 28, 0.97);
+  border: 1px solid rgba(0, 210, 255, 0.4);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: #f1f5f9;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.8), 0 0 16px rgba(0, 210, 255, 0.15);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.2s;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+}
+
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: rgba(0, 210, 255, 0.4) transparent transparent transparent;
+}
+
+.has-speech-bubble:hover .speech-bubble,
+.has-speech-bubble:focus-within .speech-bubble {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.speech-bubble-title {
+  font-weight: 700;
+  color: #00d2ff;
+  font-size: 11px;
+  margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.speech-bubble-body {
+  color: #cbd5e1;
+  font-size: 10.5px;
+  margin-bottom: 4px;
+}
+
+.speech-bubble-rec {
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 4px;
+  padding: 3px 6px;
+  color: #d8b4fe;
+  font-size: 10px;
+  font-family: var(--font-mono);
+}
+
+/* Dual A/B Button Active Glow (Classic mode only) */
+body:not(.workspace-modern) .ab-btn-active-a {
+  background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 14px rgba(2, 132, 199, 0.5) !important;
+  border-color: #38bdf8 !important;
+}
+
+body:not(.workspace-modern) .ab-btn-active-b {
+  background: #3182f6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(49, 130, 246, 0.4) !important;
+  border-color: #1b64da !important;
+}
+
+/* ==========================================================================
+   SUNO NATIVE AUDIO SPEED CONTROLLER (Pixel-Perfect Suno UI Replica)
+   ========================================================================== */
+.suno-speed-card {
+  background: #14161f;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  position: relative;
+  transition: background 0.3s ease, border-color 0.3s ease, border-radius 0.3s ease, box-shadow 0.3s ease;
+}
+
+.suno-speed-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.suno-speed-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.2px;
+}
+
+.suno-speed-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.suno-speed-pill {
+  background: #252834;
+  color: #ffffff;
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s;
+}
+
+.suno-speed-pill:hover {
+  background: #2e3242;
+}
+
+.suno-speed-reset-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 5px 7px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.suno-speed-reset-btn:hover {
+  color: #f43f5e;
+  background: rgba(244, 63, 94, 0.12);
+}
+
+.suno-speed-track-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.suno-speed-thumb-wrap {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.suno-speed-thumb-wrap:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 12px rgba(0, 210, 255, 0.35);
+  border-color: rgba(0, 210, 255, 0.45);
+}
+
+.suno-speed-thumb-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.suno-speed-thumb-wrap:hover .suno-speed-thumb-overlay {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.suno-speed-track-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.suno-speed-track-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.suno-speed-time {
+  font-size: 11.5px;
+  color: #94a3b8;
+  font-family: var(--font-mono);
+}
+
+.suno-speed-slider-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0 2px 0;
+}
+
+.suno-speed-val-display {
+  font-size: 26px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+  text-align: center;
+}
+
+.suno-speed-slider-wrap {
+  width: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.suno-speed-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: #252834;
+  border-radius: 9999px;
+  outline: none;
+  margin: 12px 0;
+  cursor: pointer;
+}
+
+/* Hollow circle / ring thumb matching Suno UI screenshot */
+.suno-speed-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #14161f;
+  border: 2px solid #ffffff;
+  cursor: grab;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+
+.suno-speed-slider:active::-webkit-slider-thumb {
+  cursor: grabbing;
+  transform: scale(1.1);
+  border-color: #38bdf8;
+}
+
+.suno-speed-slider::-moz-range-thumb {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #14161f;
+  border: 2px solid #ffffff;
+  cursor: grab;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+}
+
+.suno-speed-range-labels {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #94a3b8;
+  font-family: var(--font-mono);
+}
+
+.suno-speed-footer {
+  display: flex;
+  align-items: center;
+  padding-top: 4px;
+}
+
+/* Keep Pitch Toggle matching screenshot */
+.suno-toggle-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.suno-toggle-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.suno-toggle-track {
+  width: 46px;
+  height: 26px;
+  background-color: #252834;
+  border-radius: 9999px;
+  position: relative;
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: block;
+}
+
+.suno-toggle-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #64748b;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s, border 0.2s;
+  display: block;
+}
+
+/* When checked: light off-white track, dark knob with white outline on right side */
+.suno-toggle-checkbox:checked + .suno-toggle-track {
+  background-color: #e2e8f0;
+}
+
+.suno-toggle-checkbox:checked + .suno-toggle-track .suno-toggle-knob {
+  transform: translateX(20px);
+  background-color: #14161f;
+  border: 2px solid #ffffff;
+}
+
+.suno-toggle-label {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+/* AI Music Video & Slideshow Studio Styling */
+.mv-style-card {
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.mv-style-card:hover {
+  transform: translateY(-1.5px);
+  border-color: rgba(6, 182, 212, 0.4);
+}
+.mv-style-card.active {
+  background: linear-gradient(135deg, rgba(8, 51, 68, 0.65), rgba(15, 23, 42, 0.85)) !important;
+  border-color: #06b6d4 !important;
+  box-shadow: 0 4px 16px -2px rgba(6, 182, 212, 0.25);
+}
+.mv-style-card.active::after {
+  content: "✓";
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #06b6d4;
+  color: #041017;
+  font-size: 10px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

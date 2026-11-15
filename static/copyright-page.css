@@ -1,0 +1,81 @@
+/* Inline copyright workspace, shared by modern and classic layouts. */
+body.copyright-page-open:not(.workspace-modern) > #version-v25-root,
+body.copyright-page-open:not(.workspace-modern) > #version-v30-root { display: none !important; }
+body.copyright-page-open:not(.workspace-modern) { background: #f2f4f6 !important; }
+
+#youtube-copyright-modal:not(.hidden) { position: relative !important; inset: auto !important; z-index: auto !important; display: block !important; width: 100%; max-width: 1100px; margin: 0 auto; padding: 0 0 36px !important; background: transparent !important; backdrop-filter: none !important; }
+body.copyright-page-open:not(.workspace-modern) > #youtube-copyright-modal:not(.hidden) { padding: 36px 24px 60px !important; }
+
+/* Light mode specific copyright styles (scoped so they never leak into dark mode) */
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal { color: #333d4b; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal > div { width: 100%; max-width: none !important; max-height: none !important; overflow: visible !important; background: #fff !important; border: 0 !important; border-radius: 24px !important; box-shadow: 0 4px 24px #202b3d0a !important; animation: none !important; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal > div > div:first-child { padding: 26px 30px !important; background: #fff !important; border-color: #f2f4f6 !important; border-radius: 24px 24px 0 0; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal > div > div:first-child h3 { color: #191f28 !important; font-size: 20px; letter-spacing: -.5px; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal > div > div:first-child p { color: #8b95a1 !important; line-height: 1.6; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal > div > div:first-child > div > div:first-child { background: #e8f3ff !important; color: #3182f6 !important; border: 0 !important; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal > div > div:first-child button { background: #f2f4f6 !important; color: #6b7684 !important; border-radius: 10px; flex-shrink: 0; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal > div > div:nth-child(2) { overflow: visible !important; padding: 26px 30px !important; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal > div > div:last-child { background: #f9fafb !important; border-color: #f2f4f6 !important; border-radius: 0 0 24px 24px; padding: 20px 30px !important; gap: 15px; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal [class*="text-white"], 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal [class*="text-slate-"], 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal [class*="text-cyan-"], 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal [class*="text-teal-"], 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal [class*="text-purple-"], 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal [class*="text-amber-"], 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal [class*="text-emerald-"], 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal [class*="text-red-"] { color: #4e5968 !important; }
+
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal [class*="bg-gradient-"], 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal [class*="bg-[#"], 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal [class*="bg-black"], 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal [class*="bg-white/"], 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal .daw-card { background: #f9fafb !important; box-shadow: none !important; border-color: #edf0f3 !important; }
+
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal .daw-card { border: 1px solid #edf0f3 !important; border-radius: 16px !important; opacity: 1 !important; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #copyright-active-track-banner { background: #e8f3ff !important; border: 0 !important; border-radius: 16px !important; padding: 20px !important; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #copyright-active-track-banner h4 { color: #191f28 !important; font-size: 14px; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #copyright-active-track-banner button, 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #btn-run-copyright-url, 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #btn-run-copyright-check { background: #3182f6 !important; border: 0 !important; color: #fff !important; border-radius: 11px; padding: 13px 18px; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #copyright-active-track-banner button *, 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #btn-run-copyright-url *, 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #btn-run-copyright-check * { color: #fff !important; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #copyright-active-track-banner button:hover, 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #btn-run-copyright-url:hover, 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #btn-run-copyright-check:hover { background: #1b64da !important; }
+
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #tab-btn-cp-link, 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #tab-btn-cp-upload, 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #tab-btn-cp-recent { min-height: 48px; color: #6b7684 !important; border: 0 !important; border-radius: 9px; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal button[id^="tab-btn-cp-"][class*="bg-red"] { background: #fff !important; color: #1b64da !important; box-shadow: 0 2px 8px #202b3d12 !important; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal button[id^="tab-btn-cp-"][class*="bg-red"] * { color: #3182f6 !important; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #tab-content-cp-link, 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #tab-content-cp-upload, 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #tab-content-cp-recent { padding: 22px !important; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal input[type="text"], 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal select { min-height: 46px; background: #fff !important; color: #333d4b !important; border: 1px solid #e5e8eb !important; border-radius: 10px; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal input::placeholder { color: #b0b8c1 !important; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #copyright-dropzone { background: #fff !important; border: 1px dashed #c7d6e8 !important; border-radius: 14px; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #copyright-dropzone:hover { background: #e8f3ff !important; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #copyright-result-card { padding-top: 8px; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #copyright-verdict-box { border-radius: 16px; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #copyright-verdict-box[class*="bg-amber"] { background: #fff7e6 !important; border-color: #ffdf9e !important; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #copyright-verdict-box[class*="bg-orange"] { background: #fff1ec !important; border-color: #ffd0bc !important; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #copyright-verdict-box[class*="bg-slate"] { background: #f2f6fb !important; border-color: #e4ebf3 !important; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #copyright-status-icon { flex-shrink: 0; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #copyright-verdict-title { color: #191f28 !important; font-size: 16px; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #copyright-checks, 
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #copyright-recommendations { line-height: 1.7; }
+body:not([data-workspace-theme="dark"]) #youtube-copyright-modal #copyright-disclaimer { color: #6b7684 !important; }
+#youtube-copyright-modal :focus-visible { outline: 3px solid #3182f6; outline-offset: 3px; }
+
+@media (max-width: 640px) {
+  body.copyright-page-open:not(.workspace-modern) > #youtube-copyright-modal:not(.hidden) { padding: 18px !important; }
+  #youtube-copyright-modal > div > div:first-child, #youtube-copyright-modal > div > div:nth-child(2), #youtube-copyright-modal > div > div:last-child { padding: 18px !important; }
+  #youtube-copyright-modal > div > div:first-child h3 { font-size: 16px; }
+  #youtube-copyright-modal #tab-btn-cp-link, #youtube-copyright-modal #tab-btn-cp-upload, #youtube-copyright-modal #tab-btn-cp-recent { padding: 9px 3px; font-size: 10px; min-width: 0; }
+  #youtube-copyright-modal #tab-content-cp-link > div:first-child { flex-wrap: wrap; gap: 10px; }
+  #youtube-copyright-modal #copyright-active-track-banner h4 { max-width: 220px; }
+  #youtube-copyright-modal #copyright-verdict-box { align-items: stretch; }
+  #youtube-copyright-modal > div > div:last-child { flex-wrap: wrap; }
+}

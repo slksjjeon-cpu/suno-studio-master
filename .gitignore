@@ -1,0 +1,28 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Audio / Video / Large outputs
+outputs/
+uploads/
+.hum_cache/
+*.mp3
+*.wav
+*.mp4
+*.zip
+*.log
+temp_*
+debug_*.png
+scratch/
+
+# Sensitive tokens & OAuth
+data/*secret*
+data/*token*
+data/oauth_states.json
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

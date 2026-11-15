@@ -1,0 +1,17 @@
+fastapi>=0.110.0
+uvicorn>=0.28.0
+pydantic>=2.0.0
+python-multipart>=0.0.9
+librosa>=0.10.0
+soundfile>=0.12.0
+numpy>=1.24.0
+scipy>=1.10.0
+yt-dlp>=2024.0.0
+pillow>=10.0.0
+requests>=2.31.0
+cryptography>=42.0.0
+
+# Optional: used by the reference copyright checker.
+# Without these the check reports UNVERIFIED instead of "SAFE".
+# shazamio>=0.7.0
+# faster-whisper>=1.0.0

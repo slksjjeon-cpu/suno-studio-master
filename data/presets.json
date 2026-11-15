@@ -1,0 +1,93 @@
+[
+  {
+    "id": "city_pop_80s",
+    "name": "시티팝 (80s City Pop)",
+    "icon": "🌴",
+    "description": "세련된 펑키 베이스, 레트로 신스 브라스, 청량한 80년대 일본/한국 시티팝 그루브",
+    "prompt": "80s retro Japanese City Pop, funky slap bass, sparkling DX7 electric piano, nostalgic brass hits, driving drum groove, breezy summer night vibe",
+    "tempo_scale": 1.05,
+    "pitch_shift": 0,
+    "instrumentation": "slap_bass, electric_piano, brass_synth, funk_drums",
+    "vocal_mood": "청아하고 세련된 80s 팝 보컬 (Airy & Bright)",
+    "mastering_preset": "modern_crisp",
+    "is_custom": false
+  },
+  {
+    "id": "lofi_chill_jazz",
+    "name": "로파이 칠 재즈 (Lo-Fi Chill Jazz)",
+    "icon": "☕",
+    "description": "따뜻한 로즈 피아노, 어쿠스틱 콘트라베이스, 비닐 잡음과 칠한 비트",
+    "prompt": "Cozy lofi chillhop jazz, warm Rhodes keys, smoky upright bass, mellow brushed swing drums, subtle vinyl crackle, nostalgic cafe atmosphere",
+    "tempo_scale": 0.85,
+    "pitch_shift": -1,
+    "instrumentation": "rhodes, upright_bass, vinyl_lofi, brush_drums",
+    "vocal_mood": "나른하고 감미로운 허스키 재즈 톤 (Husky & Intimate)",
+    "mastering_preset": "warm_vintage",
+    "is_custom": false
+  },
+  {
+    "id": "cyberpunk_synthwave",
+    "name": "사이버펑크 신스웨이브 (Synthwave / Retrowave)",
+    "icon": "⚡",
+    "description": "질주하는 아날로그 아르페지오, 강력한 808 킥, 네온 도시의 레트로 퓨처 사운드",
+    "prompt": "High-octane cyberpunk synthwave, driving analog bass arpeggiator, gated reverb snare, powerful 808 kicks, neon futuristic synth lead, 128 bpm",
+    "tempo_scale": 1.15,
+    "pitch_shift": 0,
+    "instrumentation": "analog_arp, gated_snare, heavy_808, retro_lead",
+    "vocal_mood": "공간감 넘치는 레트로 신스 보컬 (Reverb & Vocoder Touch)",
+    "mastering_preset": "club_punchy",
+    "is_custom": false
+  },
+  {
+    "id": "acoustic_indie_folk",
+    "name": "어쿠스틱 인디 포크 (Acoustic Folk)",
+    "icon": "🎸",
+    "description": "따뜻한 통기타 핑거피킹, 잔잔한 카혼 리듬, 자연스럽고 서정적인 사운드",
+    "prompt": "Warm organic indie acoustic folk, fingerpicked steel string guitars, gentle cajon percussion, resonant cello swells, intimate wooden room acoustic",
+    "tempo_scale": 0.95,
+    "pitch_shift": 0,
+    "instrumentation": "acoustic_guitar, cello, cajon, ambient_room",
+    "vocal_mood": "맑고 꾸밈없는 담백한 어쿠스틱 보컬 (Pure & Natural)",
+    "mastering_preset": "acoustic_natural",
+    "is_custom": false
+  },
+  {
+    "id": "cinematic_rnb",
+    "name": "시네마틱 네오 소울 R&B (Neo-Soul R&B)",
+    "icon": "🌙",
+    "description": "묵직한 808 서브 베이스, 그루비한 하이햇 트랩 비트, 몽환적인 일렉트릭 피아노",
+    "prompt": "Dark sultry cinematic neo-soul R&B, deep 808 sub bass, crisp rolling hi-hats, reverb-washed jazz chords, sensual midnight slow jam",
+    "tempo_scale": 0.9,
+    "pitch_shift": -2,
+    "instrumentation": "sub_bass, trap_percussion, lush_pads, electric_piano",
+    "vocal_mood": "소울풀하고 끈적한 그루브 보컬 (Deep Soul & Velvet)",
+    "mastering_preset": "club_punchy",
+    "is_custom": false
+  },
+  {
+    "id": "festival_edm",
+    "name": "페스티벌 EDM (Bigroom / Future Bass)",
+    "icon": "🔥",
+    "description": "폭발적인 슈퍼쏘우 드롭, 사이드체인 펌핑, 페스티벌 앤섬 스타일",
+    "prompt": "Huge festival EDM future bass, wide detuned supersaw chords, massive sidechain pumping, energetic build-up, punchy electronic drums",
+    "tempo_scale": 1.2,
+    "pitch_shift": 2,
+    "instrumentation": "supersaw, sidechain_lead, edm_drop, riser",
+    "vocal_mood": "파워풀하고 시원한 페스티벌 팝 보컬 (Powerful & Bright)",
+    "mastering_preset": "club_punchy",
+    "is_custom": false
+  },
+  {
+    "id": "k_trot_classic",
+    "name": "정통 K-Trot (한국 트로트)",
+    "icon": "🎤",
+    "description": "꺾기와 바이브레이션이 살아있는 정통 한국 트로트. 뽕짝 리듬, 색소폰, 아코디언, 신디사이저 트럼펫 반주",
+    "prompt": "Traditional Korean Trot ppongjjak rhythm, bouncy oom-pah bass, saxophone melody, accordion fills, synth trumpet, dramatic vibrato vocal, festive Korean enka style, 2-beat rhythm pattern",
+    "tempo_scale": 1.10,
+    "pitch_shift": 0,
+    "instrumentation": "ppongjjak_bass, saxophone, accordion, synth_trumpet, trot_drums",
+    "vocal_mood": "트로트 꺾기와 바이브레이션이 깊은 정통 트로트 보컬 (Trot Vibrato & Kkeokkgi)",
+    "mastering_preset": "modern_crisp",
+    "is_custom": false
+  }
+]
