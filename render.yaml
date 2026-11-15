@@ -5,7 +5,7 @@ services:
     plan: free
     dockerfilePath: Dockerfile
     envVars:
-      - key: PORT
-        value: 7860
+      - key: STUDIO_NO_BROWSER
+        value: "1"
       - key: HOST
         value: 0.0.0.0
