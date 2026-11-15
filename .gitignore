@@ -20,6 +20,7 @@ scratch/
 data/*secret*
 data/*token*
 data/oauth_states.json
+data/hf_config.json
 
 # OS / Editor
 .DS_Store
