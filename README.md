@@ -1,3 +1,13 @@
+---
+title: Suno Studio Master
+emoji: 🎵
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+app_port: 7860
+---
+
 # 🎧 Antigravity 장르 변경 커버곡 스튜디오 (Genre Transformation Studio)
 
 > **RTX 2060 (6GB VRAM) 최적화 순차 대기열 기반 AI 커버곡 & 장르 편곡 스튜디오 MVP**

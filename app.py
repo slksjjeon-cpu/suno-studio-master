@@ -143,13 +143,9 @@ app = FastAPI(title="Suno AI Mastering Studio", version="2.1.0")
 # Local-only app: do not expose credentialed CORS to arbitrary web origins.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://127.0.0.1:8000", "http://127.0.0.1:8001", "http://127.0.0.1:8002",
-        "http://localhost:8000", "http://localhost:8001", "http://localhost:8002",
-        "https://suno.com", "https://suno.ai",
-    ],
+    allow_origins=["*"],
     allow_credentials=False,
-    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
@@ -3697,20 +3693,28 @@ if __name__ == "__main__":
     import uvicorn
     import socket
 
-    selected_port = 8000
-    for cand in [8000, 8001, 8080]:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
-            s.bind(("127.0.0.1", cand))
-            s.close()
-            selected_port = cand
-            break
-        except Exception:
-            pass
+    env_port = os.environ.get("PORT")
+    env_host = os.environ.get("HOST")
 
-    if selected_port != 8000:
+    if env_port:
+        selected_port = int(env_port)
+        selected_host = env_host or "0.0.0.0"
+    else:
+        selected_port = 8000
+        selected_host = env_host or "127.0.0.1"
+        for cand in [8000, 8001, 8080]:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                s.bind(("127.0.0.1", cand))
+                s.close()
+                selected_port = cand
+                break
+            except Exception:
+                pass
+
+    if selected_port != 8000 and not env_port:
         print(f"[Antigravity] Note: Port 8000 was unavailable (reserved/blocked by Windows NAT). Using port {selected_port}.")
-    studio_url = f"http://127.0.0.1:{selected_port}"
+    studio_url = f"http://{selected_host}:{selected_port}"
     print(f"[Antigravity] Starting studio server on {studio_url}")
     print("[Antigravity] Set STUDIO_NO_BROWSER=1 to suppress the automatic browser launch.")
 
@@ -3746,4 +3750,4 @@ if __name__ == "__main__":
                 pass
         threading.Thread(target=_open_browser, daemon=True).start()
 
-    uvicorn.run("app:app", host="127.0.0.1", port=selected_port, reload=False)
+    uvicorn.run("app:app", host=selected_host, port=selected_port, reload=False)

@@ -102,4 +102,7 @@ def run_service():
         app_proc.terminate()
 
 if __name__ == "__main__":
-    run_service()
+    if len(sys.argv) > 1:
+        update_desktop_shortcuts(sys.argv[1].strip())
+    else:
+        run_service()
