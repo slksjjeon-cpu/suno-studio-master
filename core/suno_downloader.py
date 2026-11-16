@@ -13,6 +13,7 @@ import base64
 import hashlib
 import tempfile
 import subprocess
+import unicodedata
 import urllib.request
 import urllib.parse
 from pathlib import Path
@@ -49,13 +50,15 @@ def extract_suno_id(url_or_id: str) -> str | None:
                 if m2:
                     return m2.group(1).lower()
                 # If short URL (e.g. /s/...) didn't redirect with UUID in path, inspect HTML content
-                content = resp.read().decode("utf-8", errors="replace")
-                m3 = re.search(r'/song/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})', content, re.I)
-                if m3:
-                    return m3.group(1).lower()
-                for cand in re.findall(r'([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})', content, re.I):
-                    if cand.lower() != "00000000-0000-0000-0000-000000000000":
-                        return cand.lower()
+                # But do NOT inspect if redirected to root home page (meaning link is invalid/expired)
+                if not re.search(r'suno\.(com|ai)/?$', final_url, re.I):
+                    content = resp.read().decode("utf-8", errors="replace")
+                    m3 = re.search(r'/song/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})', content, re.I)
+                    if m3:
+                        return m3.group(1).lower()
+                    m4 = re.search(r'["\'](?:clip_id|song_id|id)["\']\s*:\s*["\']([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})["\']', content, re.I)
+                    if m4:
+                        return m4.group(1).lower()
         except Exception as e:
             print(f"[SunoDownloader] Warning resolving suno link '{text}': {e}")
     return None
@@ -487,7 +490,8 @@ def download_suno_song(url_or_id: str, progress_cb=None) -> dict:
     meta = fetch_suno_metadata(song_id)
     title = meta.get("title") or f"Suno_{song_id[:8]}"
     clean_title = title.replace("‘", "'").replace("’", "'").replace("“", "'").replace("”", "'")
-    clean_title = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "", clean_title).strip(". ")[:80] or f"Suno_{song_id[:8]}"
+    norm = unicodedata.normalize('NFKC', str(clean_title))
+    clean_title = re.sub(r'[<>:"/\\|?*\x00-\x1f\x7f-\x9f\uff5c]', "", norm).strip(". \t\r\n")[:80].strip(". \t\r\n") or f"Suno_{song_id[:8]}"
 
     if progress_cb:
         progress_cb(20, f"'{clean_title}' 스트림 경로 탐색 중...")

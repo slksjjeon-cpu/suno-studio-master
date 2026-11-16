@@ -57,16 +57,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 def normalize_title(title: str) -> str:
-    """Normalize title to standard clean ASCII/Unicode:
+    r"""Normalize title to standard clean ASCII/Unicode:
     1. Converts Mathematical Bold (e.g. 𝗦𝘁𝗮𝘆 𝗪𝗶𝘁𝗵 𝗠𝒆 -> Stay with Me),
        Italic, Script, and Fullwidth variants into standard, normal-weight characters.
-    2. Strips illegal control characters and trailing dots/spaces.
+    2. Strips illegal Windows filename characters (< > : " / \ | ? *) and control characters.
+    3. Strips trailing dots, spaces, and whitespace.
     """
     if not title:
         return ""
     norm = unicodedata.normalize('NFKC', str(title))
-    norm = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', norm)
-    return norm.strip()
+    norm = re.sub(r'[<>:"/\\|?*\x00-\x1f\x7f-\x9f\uff5c]', '', norm)
+    return norm.strip(". \t\r\n")
 
 from core.analyzer_suno import analyze_suno_track
 from core.queue_worker import StudioQueueManager
@@ -114,11 +115,19 @@ def get_safe_unique_filepath(dest_dir: Union[Path, str], filename: str, new_file
     """
     dest_path = Path(dest_dir)
     dest_path.mkdir(parents=True, exist_ok=True)
-    file_p = dest_path / filename
-    if not file_p.exists():
-        return file_p
-    stem = file_p.stem
-    ext = file_p.suffix
+    raw_name = Path(filename).name
+    stem = normalize_title(Path(raw_name).stem)[:80].strip(". \t\r\n") or "file"
+    ext = Path(raw_name).suffix
+    file_p = dest_path / f"{stem}{ext}"
+    try:
+        if not file_p.exists():
+            return file_p
+    except Exception:
+        # Fallback if anything invalid remained
+        stem = re.sub(r'[^a-zA-Z0-9_\-\uac00-\ud7a3\u3040-\u30ff\u4e00-\u9fff]', '', stem)[:50] or "file"
+        file_p = dest_path / f"{stem}{ext}"
+        if not file_p.exists():
+            return file_p
     if new_file_size is not None:
         try:
             if file_p.stat().st_size == new_file_size:
@@ -2960,7 +2969,7 @@ def _process_batch_job(batch_id: str):
                     raw_title = info.get("title", "YouTube_Track")
                     vid_id = info.get("id", uuid.uuid4().hex[:6])
 
-                clean_title = normalize_title(re.sub(r'[<>:"/\\|?*\x00-\x1f]', "", raw_title).strip(". "))[:80]
+                clean_title = normalize_title(raw_title)[:80].strip(". \t\r\n")
                 if not clean_title:
                     clean_title = f"YouTube_{vid_id}"
                 item["title"] = clean_title
@@ -3066,7 +3075,7 @@ def _process_batch_job(batch_id: str):
 
                 suno_mp3_path = Path(raw_path)
                 raw_song_title = dl_res.get("title") or suno_mp3_path.stem
-                clean_title = normalize_title(re.sub(r'[<>:"/\\|?*\x00-\x1f]', "", str(raw_song_title)).strip(". "))[:80] or f"Suno_{uuid.uuid4().hex[:6]}"
+                clean_title = normalize_title(str(raw_song_title))[:80].strip(". \t\r\n") or f"Suno_{uuid.uuid4().hex[:6]}"
                 item["title"] = clean_title
 
                 # Smart duplicate preservation for MP3
