@@ -3727,13 +3727,13 @@ if __name__ == "__main__":
     print(f"[Antigravity] Starting studio server on {studio_url}")
     print("[Antigravity] Set STUDIO_NO_BROWSER=1 to suppress the automatic browser launch.")
 
-    # Seamless dual-port forwarder: If running on 8000, redirect any request hitting 8001 to 8000
+    # Seamless multi-port forwarder: If running on 8000, redirect any request hitting 8001 or 8080 to 8000
     if selected_port == 8000:
-        def _redirect_8001():
+        def _redirect_port(p):
             try:
                 import http.server
                 import socketserver
-                class Redirect8001Handler(http.server.BaseHTTPRequestHandler):
+                class RedirectHandler(http.server.BaseHTTPRequestHandler):
                     def do_GET(self):
                         self.send_response(307)
                         self.send_header('Location', f'http://127.0.0.1:8000{self.path}')
@@ -3743,11 +3743,12 @@ if __name__ == "__main__":
                         self.send_header('Location', f'http://127.0.0.1:8000{self.path}')
                         self.end_headers()
                     def log_message(self, *args): pass
-                with socketserver.TCPServer(("127.0.0.1", 8001), Redirect8001Handler) as srv:
+                with socketserver.TCPServer(("127.0.0.1", p), RedirectHandler) as srv:
                     srv.serve_forever()
             except Exception:
                 pass
-        threading.Thread(target=_redirect_8001, daemon=True).start()
+        threading.Thread(target=_redirect_port, args=(8001,), daemon=True).start()
+        threading.Thread(target=_redirect_port, args=(8080,), daemon=True).start()
 
     if os.environ.get("STUDIO_NO_BROWSER", "").strip().lower() not in ("1", "true", "yes"):
         def _open_browser():
