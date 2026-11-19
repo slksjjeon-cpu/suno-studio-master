@@ -87,6 +87,7 @@ from core.youtube_uploader import (
     fetch_and_save_channel_info,
     disconnect_youtube,
     upload_video_to_youtube,
+    format_youtube_error,
 )
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -2295,7 +2296,7 @@ async def export_mp4_endpoint(req: ExportMp4Request):
                 resp["youtube_id"] = yt_out.get("video_id")
             except Exception as ye:
                 print(f"[ExportMp4] YouTube upload error: {ye}")
-                resp["youtube_error"] = str(ye)
+                resp["youtube_error"] = format_youtube_error(ye)
 
         return resp
 
@@ -3200,10 +3201,10 @@ def _process_batch_job(batch_id: str):
                             print(f"[Batch] Warning deleting temp mp4: {del_err}")
                 except Exception as ye:
                     print(f"[BatchYouTubeUpload] Error: {ye}")
-                    item["youtube_error"] = str(ye)
+                    item["youtube_error"] = format_youtube_error(ye)
             elif upload_youtube and not is_youtube_authenticated():
                 print(f"[BatchYouTubeUpload] Skipped: YouTube not authenticated")
-                item["youtube_error"] = "유튜브 미연동"
+                item["youtube_error"] = "유튜브 미연동 (설정에서 연동 필요)"
 
             with batch_lock:
                 item["progress"] = 100
@@ -3214,13 +3215,14 @@ def _process_batch_job(batch_id: str):
                     else:
                         item["message"] = "완료 (유튜브 업로드 성공 🎉)"
                 elif item.get("youtube_error"):
-                    item["message"] = f"완료 (유튜브 실패: {item['youtube_error']})"
+                    item["message"] = f"완료 ({item['youtube_error']})"
                 else:
                     item["message"] = "완료"
                 if export_mp3 and mp3_path and mp3_path.exists():
                     item["mp3_url"] = f"/api/batch/file/{batch_id}/{urllib.parse.quote(mp3_path.name)}"
                     item["mp3_name"] = mp3_path.name
-                if export_mp4 and mp4_path and mp4_path.exists():
+                # If MP4 export was requested OR YouTube upload failed, provide MP4 download link so user never loses their video
+                if (export_mp4 or item.get("youtube_error")) and mp4_path and mp4_path.exists():
                     item["mp4_url"] = f"/api/batch/file/{batch_id}/{urllib.parse.quote(mp4_path.name)}"
                     item["mp4_name"] = mp4_path.name
                 task["completed"] += 1
@@ -3235,8 +3237,9 @@ def _process_batch_job(batch_id: str):
                 item["message"] = f"실패: {exc}"
                 task["failed"] += 1
 
-    # Clean up batch directory if pure YouTube transfer was used and no local exports were kept
-    if not export_mp3 and not export_mp4 and batch_out_dir.exists():
+    # Clean up batch directory ONLY if all YouTube uploads succeeded and no local exports were kept
+    has_unuploaded_mp4 = any(it.get("youtube_error") for it in task.get("items", []))
+    if not export_mp3 and not export_mp4 and not has_unuploaded_mp4 and batch_out_dir.exists():
         try:
             for left in list(batch_out_dir.iterdir()):
                 if left.is_file():
@@ -3695,7 +3698,7 @@ def upload_to_youtube_api(req: YouTubeUploadRequest):
         )
         return res
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=format_youtube_error(e))
 
 
 if __name__ == "__main__":

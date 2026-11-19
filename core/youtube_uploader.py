@@ -241,3 +241,18 @@ def upload_video_to_youtube(
         "title": title,
         "privacy": privacy_status
     }
+
+
+def format_youtube_error(exc: Any) -> str:
+    """Format YouTube API exception into friendly, actionable Korean explanation."""
+    raw = str(exc or "")
+    low = raw.lower()
+    if "quota exceeded" in low or "videouploadsperday" in low or "ratelimitexceeded" in low or "429" in raw:
+        return "구글 API 일일 업로드 한도(Quota) 초과 (하루 최대 6~10개 영상. 오후 4~5시 자동 리셋)"
+    if "invalid_grant" in low or "token has been expired" in low or "revoked" in low:
+        return "유튜브 인증 만료 (유튜브 설정에서 계정 재연동 필요)"
+    if "upload limit reached" in low:
+        return "유튜브 채널 일일 업로드 제한 도달 (유튜브 정책 제한)"
+    if "badrequest" in low or "400" in raw:
+        return f"유튜브 요청 오류: {raw[:60]}"
+    return f"업로드 실패 ({raw[:50]})"

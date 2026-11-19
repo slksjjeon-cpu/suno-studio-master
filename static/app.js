@@ -7556,7 +7556,7 @@ function renderBatchStatus(batch) {
                 <span style="color: #ffffff !important; font-weight: 700 !important;">YouTube 보기</span>
               </a>
             ` : (it.youtube_error ? `
-              <span class="text-[10px] text-rose-400 font-sans" title="${(it.youtube_error || '').replace(/"/g, '&quot;')}">⚠️ 유튜브 업로드: ${it.youtube_error.slice(0, 30)}</span>
+              <span class="text-[10px] text-rose-300 font-sans font-medium px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/20" title="${(it.youtube_error || '').replace(/"/g, '&quot;')}">⚠️ ${it.youtube_error}</span>
             ` : '')}
             ${it.mp3_url ? `
               <a href="${it.mp3_url}" download="${(it.mp3_name || 'audio.mp3').replace(/"/g, '&quot;')}" class="btn-toss-secondary px-3 py-1.5 rounded-xl text-[11px] font-semibold font-sans transition flex items-center gap-1.5 active:scale-[0.98]">
