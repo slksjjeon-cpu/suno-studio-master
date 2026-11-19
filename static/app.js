@@ -6971,7 +6971,7 @@ window.importSunoPlaylistHtml = async function(input) {
     // from text instead, without executing scripts or loading page resources.
     const text = html.replace(/\\\//g, '/').replace(/&amp;/g, '&');
     const matches = text.matchAll(/(?:https?:\/\/(?:www\.)?suno\.(?:com|ai))?\/song\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?![0-9a-f-])/gi);
-    const ids = [...new Set(Array.from(matches, m => m[1].toLowerCase()))];
+    const ids = [...new Set(Array.from(matches, m => m[1].toLowerCase()))].reverse();
     if (!ids.length) throw new Error('저장된 페이지에서 곡 링크를 찾지 못했습니다. Suno에서 곡 목록을 아래까지 스크롤한 뒤 HTML만 저장해 다시 선택해 주세요.');
     const list = document.getElementById('batch-urls-list');
     if (!list) throw new Error('곡 목록을 찾을 수 없습니다.');

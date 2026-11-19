@@ -12,6 +12,7 @@ import time
 import base64
 import hashlib
 import tempfile
+import shutil
 import subprocess
 import unicodedata
 import urllib.request
@@ -85,6 +86,10 @@ def fetch_suno_metadata(song_id: str) -> dict:
                 meta["image_url"] = data["image_url"]
             if data.get("duration"):
                 meta["duration"] = data["duration"]
+            if data.get("video_url"):
+                meta["video_url"] = data["video_url"]
+            if data.get("audio_url"):
+                meta["audio_url"] = data["audio_url"]
             return meta
     except Exception:
         pass
@@ -417,6 +422,9 @@ def resolve_suno_playlist(url_or_id: str) -> dict:
                 return {"ok": False, "error": f"플레이리스트 로드 실패: {e}"}
             break
 
+    # User requirement: Suno 플레이리스트 URL 입력 시, 최신순이 아닌 오래된 순(생성일 순)이 먼저 오도록 역순 정렬
+    songs.reverse()
+
     return {
         "ok": True,
         "playlist_id": pl_id,
@@ -512,53 +520,108 @@ def download_suno_song(url_or_id: str, progress_cb=None) -> dict:
     if not audio_url:
         audio_url = f"https://d2lwuy8qc234o3.cloudfront.net/1/clip/{song_id}.m4a"
 
-    if progress_cb:
-        progress_cb(35, "Suno 오디오 데이터 다운로드 중...")
-
-    req_audio = urllib.request.Request(audio_url, headers=DEFAULT_HEADERS)
-    with urllib.request.urlopen(req_audio, timeout=30) as resp:
-        raw_audio = resp.read()
-
-    # Check if stream is encrypted
-    # Valid MP4 containers start with ftyp box at offset 4
-    is_mp4 = len(raw_audio) > 8 and raw_audio[4:8] == b"ftyp"
-    is_mp3 = len(raw_audio) > 3 and (raw_audio[:3] == b"ID3" or raw_audio[:2] == b"\xff\xfb")
-    
-    decrypted_bytes = raw_audio
-    if not is_mp4 and not is_mp3:
-        if progress_cb:
-            progress_cb(50, "Suno 고음질 Eden 오디오 복호화 중...")
-        try:
-            decrypted_bytes = decrypt_suno_audio(song_id, raw_audio)
-        except Exception as e:
-            # If decryption fails, attempt to save as-is
-            decrypted_bytes = raw_audio
-
-    if progress_cb:
-        progress_cb(65, "고음질 320kbps MP3 변환 및 정규화 중...")
-
-    # Write temporary file
-    tmp_in = tempfile.NamedTemporaryFile(suffix=".m4a", delete=False)
-    tmp_in.write(decrypted_bytes)
-    tmp_in.close()
-
-    # Generate final filename directly matching the Suno song title
+    # Determine CDN video URL as official audio/video fallback
+    cdn_fallback_url = meta.get("video_url") or f"https://cdn1.suno.ai/{song_id}.mp4"
     final_filename = f"{clean_title}.mp3"
     final_path = UPLOADS_DIR / final_filename
-
     ffmpeg = get_ffmpeg_bin()
-    subprocess.run([
-        ffmpeg, "-y", "-v", "error",
-        "-i", tmp_in.name,
-        "-c:a", "libmp3lame",
-        "-b:a", "320k",
-        str(final_path)
-    ], check=True)
 
+    def _convert_via_official_mp4() -> bool:
+        if progress_cb:
+            progress_cb(60, "Suno 공식 고음질 스트림(MP4)에서 오디오 추출 중...")
+        # First attempt: stream directly via FFmpeg
+        try:
+            res = subprocess.run([
+                ffmpeg, "-y", "-v", "error",
+                "-i", cdn_fallback_url,
+                "-vn", "-c:a", "libmp3lame",
+                "-b:a", "320k",
+                str(final_path)
+            ], timeout=60)
+            if res.returncode == 0 and final_path.exists() and final_path.stat().st_size > 1000:
+                return True
+        except Exception as ex:
+            print(f"[SunoDownloader] Direct FFmpeg CDN stream extraction failed ({ex}), downloading to temp file...")
+
+        # Second attempt: download MP4 to temp file, then convert
+        tmp_mp4 = tempfile.NamedTemporaryFile(suffix=".mp4", delete=False)
+        try:
+            req = urllib.request.Request(cdn_fallback_url, headers=DEFAULT_HEADERS)
+            with urllib.request.urlopen(req, timeout=30) as resp, open(tmp_mp4.name, "wb") as f_out:
+                shutil.copyfileobj(resp, f_out)
+            res = subprocess.run([
+                ffmpeg, "-y", "-v", "error",
+                "-i", tmp_mp4.name,
+                "-vn", "-c:a", "libmp3lame",
+                "-b:a", "320k",
+                str(final_path)
+            ], timeout=60)
+            return res.returncode == 0 and final_path.exists() and final_path.stat().st_size > 1000
+        except Exception as ex2:
+            print(f"[SunoDownloader] Downloaded MP4 conversion failed: {ex2}")
+            return False
+        finally:
+            try:
+                os.unlink(tmp_mp4.name)
+            except Exception:
+                pass
+
+    converted = False
+
+    # Attempt 1: Try progressive stream (decrypt if Eden encrypted)
     try:
-        os.unlink(tmp_in.name)
-    except Exception:
-        pass
+        if progress_cb:
+            progress_cb(35, "Suno 오디오 데이터 다운로드 중...")
+
+        req_audio = urllib.request.Request(audio_url, headers=DEFAULT_HEADERS)
+        with urllib.request.urlopen(req_audio, timeout=25) as resp:
+            raw_audio = resp.read()
+
+        is_mp4 = len(raw_audio) > 8 and raw_audio[4:8] == b"ftyp"
+        is_mp3 = len(raw_audio) > 3 and (raw_audio[:3] == b"ID3" or raw_audio[:2] == b"\xff\xfb")
+        decrypted_bytes = raw_audio
+
+        if not is_mp4 and not is_mp3:
+            if progress_cb:
+                progress_cb(50, "Suno 고음질 Eden 오디오 복호화 중...")
+            decrypted_bytes = decrypt_suno_audio(song_id, raw_audio)
+
+        is_valid_stream = (
+            (len(decrypted_bytes) > 8 and decrypted_bytes[4:8] == b"ftyp") or
+            (len(decrypted_bytes) > 3 and (decrypted_bytes[:3] == b"ID3" or decrypted_bytes[:2] == b"\xff\xfb"))
+        )
+
+        if is_valid_stream:
+            if progress_cb:
+                progress_cb(65, "고음질 320kbps MP3 변환 및 정규화 중...")
+            tmp_in = tempfile.NamedTemporaryFile(suffix=".m4a", delete=False)
+            try:
+                tmp_in.write(decrypted_bytes)
+                tmp_in.close()
+                res = subprocess.run([
+                    ffmpeg, "-y", "-v", "error",
+                    "-i", tmp_in.name,
+                    "-c:a", "libmp3lame",
+                    "-b:a", "320k",
+                    str(final_path)
+                ], timeout=45)
+                if res.returncode == 0 and final_path.exists() and final_path.stat().st_size > 1000:
+                    converted = True
+            finally:
+                try:
+                    os.unlink(tmp_in.name)
+                except Exception:
+                    pass
+        else:
+            print("[SunoDownloader] Stream is not a valid container, switching to official CDN MP4 fallback...")
+    except Exception as ex:
+        print(f"[SunoDownloader] Progressive stream extraction failed ({ex}), switching to fallback...")
+
+    # Attempt 2: Fallback to official CDN MP4 if progressive stream failed
+    if not converted:
+        fallback_ok = _convert_via_official_mp4()
+        if not fallback_ok or not final_path.exists() or final_path.stat().st_size < 1000:
+            raise RuntimeError(f"Suno 음원 다운로드 및 변환 실패: 오디오 스트림을 추출할 수 없습니다. (ID: {song_id})")
 
     if progress_cb:
         progress_cb(80, "Suno 음원 준비 완료! 정밀 음향 분석 시작...")
