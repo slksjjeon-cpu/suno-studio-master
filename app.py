@@ -2042,6 +2042,15 @@ async def preview_pitch_speed_endpoint(req: PreviewPitchSpeedRequest):
         start_sec = _clamp(req.start_sec, 0.0, 86400.0, 0.0)
         dur_sec = _clamp(req.duration_sec, 3.0, 30.0, 15.0)
 
+        # Auto-cleanup old audition temporary files to keep disk space fresh
+        try:
+            now_ts = time.time()
+            for old_aud in Path(OUTPUTS_DIR).glob("audition_*.wav"):
+                if now_ts - old_aud.stat().st_mtime > 60:
+                    old_aud.unlink(missing_ok=True)
+        except Exception:
+            pass
+
         preview_id = f"audition_{uuid.uuid4().hex[:8]}"
         out_name = f"{preview_id}.wav"
         out_path = os.path.join(OUTPUTS_DIR, out_name)

@@ -875,29 +875,150 @@ function setupEventListeners() {
   updateSpeedBadge();
 }
 
-// Suno Speed Card Audition Playback Logic
+// Audition Audio Elements & Highest Priority Coordination
+let pitchPreviewAudio = null;
+let sunoPitchLiveTimer = null;
+let sunoPitchSequence = 0;
+let sunoPitchAuditioning = false;
+
+// ENFORCE TOP PRIORITY PLAYBACK: Pauses all competing audio players immediately
+function enforceAuditionTopPriority(targetPlayer) {
+  // 1. Pause main DAW audio if target is different
+  if (state.audioElement && targetPlayer !== state.audioElement && !state.audioElement.paused) {
+    state.audioElement.pause();
+    state.isPlaying = false;
+    if (dom.btnPlayPause) dom.btnPlayPause.innerHTML = '<i class="fa-solid fa-play"></i>';
+    if (dom.iconSpeedThumbPlay) dom.iconSpeedThumbPlay.className = "fa-solid fa-play text-white text-xs";
+  }
+  // 2. Pause pitch preview player if target is different
+  if (pitchPreviewAudio && targetPlayer !== pitchPreviewAudio && !pitchPreviewAudio.paused) {
+    pitchPreviewAudio.pause();
+    sunoPitchAuditioning = false;
+    if (dom.btnPitchPreviewAudition) {
+      dom.btnPitchPreviewAudition.innerHTML = `<i class="fa-solid fa-headphones text-[10px]"></i> <span>피치 미리듣기</span>`;
+    }
+  }
+  // 3. Pause hum engine if active
+  if (window.humAudio && !window.humAudio.paused) {
+    try { window.humAudio.pause(); } catch(e) {}
+  }
+  // 4. Pause rendered master preview if active
+  if (state.renderedMasterAudio && !state.renderedMasterAudio.paused) {
+    try { state.renderedMasterAudio.pause(); } catch(e) {}
+  }
+}
+
+// Unified Audition Real-time / Processing Status & Guidance Notification Bar
+function updateAuditionNotice(status, title, desc) {
+  const notice = document.getElementById("audition-live-status-notice");
+  const dot = document.getElementById("audition-live-indicator-dot");
+  const titleEl = document.getElementById("audition-live-status-title");
+  const descEl = document.getElementById("audition-live-status-desc");
+  if (!notice || !titleEl) return;
+
+  if (status === "processing" || status === "updating") {
+    notice.className = "mt-2.5 p-2 rounded-lg bg-[#191308] border border-amber-500/40 flex items-center justify-between gap-2 text-[10.5px] font-mono transition-all";
+    if (dot) dot.className = "fa-solid fa-spinner fa-spin text-amber-400 text-xs shrink-0";
+    titleEl.className = "font-bold text-amber-300 shrink-0";
+    titleEl.textContent = title || "반영 중 (연산 중...)";
+    if (descEl) {
+      descEl.textContent = desc || "정밀 피치 알고리즘(Rubberband) 연산 중입니다. 완료 즉시 최우선 재생됩니다.";
+      descEl.className = "text-amber-200/80 text-[10px] truncate";
+    }
+  } else if (status === "live") {
+    notice.className = "mt-2.5 p-2 rounded-lg bg-[#081512] border border-emerald-500/40 flex items-center justify-between gap-2 text-[10.5px] font-mono transition-all";
+    if (dot) dot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0";
+    titleEl.className = "font-bold text-emerald-300 shrink-0";
+    titleEl.textContent = title || "LIVE 실시간 적용 중";
+    if (descEl) {
+      descEl.textContent = desc || "재생 중 배속 및 피치가 지연 없이 즉각 다이렉트 반영 중입니다.";
+      descEl.className = "text-emerald-200/80 text-[10px] truncate";
+    }
+  } else {
+    notice.className = "mt-2.5 p-2 rounded-lg bg-[#0a101d] border border-cyan-500/20 flex items-center justify-between gap-2 text-[10.5px] font-mono transition-all";
+    if (dot) dot.className = "w-2 h-2 rounded-full bg-cyan-400 shrink-0";
+    titleEl.className = "font-bold text-cyan-300 shrink-0";
+    titleEl.textContent = title || "미리듣기 대기 중";
+    if (descEl) {
+      descEl.textContent = desc || "재생 시 0ms 실시간 배속 및 정밀 피치가 최우선으로 청음됩니다.";
+      descEl.className = "text-slate-400 text-[10px] truncate";
+    }
+  }
+}
+
+// Speed Live Badge Controller
+function setSunoSpeedLiveBadge(mode, customText) {
+  const badge = document.getElementById("suno-speed-live-badge");
+  if (!badge) return;
+  if (mode === "updating" || mode === "processing") {
+    badge.className = "text-[9.5px] px-2 py-0.5 rounded-full bg-amber-950/80 border border-amber-500/40 text-amber-300 font-mono font-bold flex items-center gap-1.5 transition-all";
+    badge.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-[8px] text-amber-400"></i><span>${customText || "반영 중..."}</span>`;
+  } else if (mode === "live") {
+    badge.className = "text-[9.5px] px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 font-mono font-bold flex items-center gap-1.5 shadow-sm transition-all";
+    badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>${customText || "LIVE 실시간 적용 중"}</span>`;
+  } else {
+    badge.className = "text-[9.5px] px-2 py-0.5 rounded-full bg-slate-800/80 border border-slate-700 text-slate-400 font-mono font-bold flex items-center gap-1.5 transition-all";
+    badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span><span>${customText || "실시간 대기"}</span>`;
+  }
+}
+
+// Pitch Live Badge Controller
+function setSunoPitchLiveBadge(mode, customText) {
+  const badge = document.getElementById("suno-pitch-live-badge");
+  if (!badge) return;
+  if (mode === "updating" || mode === "processing") {
+    badge.className = "text-[9.5px] px-2 py-0.5 rounded-full bg-amber-950/80 border border-amber-500/40 text-amber-300 font-mono font-bold flex items-center gap-1.5 transition-all";
+    badge.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-[8px] text-amber-400"></i><span>${customText || "반영 중 (연산 중...)"}</span>`;
+  } else if (mode === "live" || mode === "updated") {
+    badge.className = "text-[9.5px] px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 font-mono font-bold flex items-center gap-1.5 shadow-sm transition-all";
+    badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>${customText || "LIVE 실시간 적용 중"}</span>`;
+  } else {
+    badge.className = "text-[9.5px] px-2 py-0.5 rounded-full bg-purple-950/80 border border-purple-500/40 text-purple-300 font-mono font-bold flex items-center gap-1.5 transition-all";
+    badge.innerHTML = `<i class="fa-solid fa-bolt text-[8px] text-purple-400"></i><span>${customText || "LIVE 실시간 적용 중"}</span>`;
+  }
+}
+
+// Suno Speed Card Audition Playback Logic (Highest Priority)
 function toggleSunoSpeedPlay() {
   if (!state.audio || !state.audioElement.src) {
     alert("먼저 Suno 음원을 불러와주세요!");
     return;
   }
 
+  const spd = dom.sunoSpeedSlider ? (parseFloat(dom.sunoSpeedSlider.value) || 1.0) : 1.0;
+  const pitch = (state.pitchShift !== undefined) ? state.pitchShift : (dom.sunoPitchSlider ? (parseFloat(dom.sunoPitchSlider.value) || 0.0) : 0.0);
+
+  // If fine pitch shift is non-zero, route to unified pitch & speed audition with Top Priority:
+  if (Math.abs(pitch) > 0.005) {
+    playPitchPreviewAudition({ toggleStop: true });
+    return;
+  }
+
   if (state.audioElement.paused) {
+    // ENFORCE TOP PRIORITY
+    enforceAuditionTopPriority(state.audioElement);
+
     state.isPlayingSection = false; // Audition full track at speed
-    const spd = dom.sunoSpeedSlider ? (parseFloat(dom.sunoSpeedSlider.value) || 1.0) : 1.0;
     state.audioElement.playbackRate = spd;
     state.audioElement.preservesPitch = dom.toggleKeepPitch ? dom.toggleKeepPitch.checked : true;
 
-    if (state.audioElement.currentTime >= state.duration - 0.2) {
+    if (state.auditionSeekSec !== undefined && Math.abs(state.audioElement.currentTime - state.auditionSeekSec) > 0.3) {
+      state.audioElement.currentTime = state.auditionSeekSec;
+    } else if (state.audioElement.currentTime >= state.duration - 0.2) {
       state.audioElement.currentTime = 0;
     }
+
     state.audioElement.play().then(() => {
       if (dom.iconSpeedThumbPlay) dom.iconSpeedThumbPlay.className = "fa-solid fa-pause text-white text-xs";
       dom.playheadLine.classList.remove("hidden");
+      setSunoSpeedLiveBadge("live", "LIVE 실시간 적용 중");
+      setSunoPitchLiveBadge("live", "LIVE 실시간 적용 중");
+      updateAuditionNotice("live", "LIVE 실시간 적용 중", `${spd.toFixed(2)}x 배속이 0ms 지연으로 최우선 실시간 재생 중입니다.`);
     }).catch(e => console.log("Speed audition play error:", e));
   } else {
     state.audioElement.pause();
     if (dom.iconSpeedThumbPlay) dom.iconSpeedThumbPlay.className = "fa-solid fa-play text-white text-xs";
+    updateAuditionNotice("idle", "미리듣기 일시정지", "재생 버튼을 누르면 최우선으로 즉시 청음됩니다.");
   }
 }
 
@@ -914,10 +1035,23 @@ function setAudioSpeed(speed) {
   const val = Math.max(0.50, Math.min(2.00, speed));
   if (dom.sunoSpeedSlider) dom.sunoSpeedSlider.value = val.toFixed(2);
   if (dom.sunoSpeedValDisplay) dom.sunoSpeedValDisplay.textContent = `${val.toFixed(2)}x`;
+
+  // Real-time 0ms latency update on both active player elements:
   if (state.audioElement) {
     state.audioElement.playbackRate = val;
     state.audioElement.preservesPitch = dom.toggleKeepPitch ? dom.toggleKeepPitch.checked : true;
   }
+  if (pitchPreviewAudio) {
+    pitchPreviewAudio.playbackRate = val;
+    pitchPreviewAudio.preservesPitch = dom.toggleKeepPitch ? dom.toggleKeepPitch.checked : true;
+  }
+
+  const isPlaying = (state.audioElement && !state.audioElement.paused) || (pitchPreviewAudio && !pitchPreviewAudio.paused);
+  setSunoSpeedLiveBadge("live", "LIVE 실시간 적용 중");
+  if (isPlaying) {
+    updateAuditionNotice("live", "LIVE 실시간 적용 중", `${val.toFixed(2)}x 정밀 배속이 실시간(0ms 지연)으로 즉각 반영되었습니다.`);
+  }
+
   updateEndingTimeCalculation();
   updateDraftNameInput();
   updateSpeedBadge();
@@ -961,33 +1095,6 @@ function setAudioPitch(pitch) {
   updateSpeedBadge();
 }
 
-// Instant 15-second Pitch & Speed Audition Preview
-let pitchPreviewAudio = null;
-let sunoPitchLiveTimer = null;
-let sunoPitchSequence = 0;
-let sunoPitchAuditioning = false;
-
-function setSunoPitchLiveBadge(mode, customText) {
-  const badge = document.getElementById("suno-pitch-live-badge");
-  if (!badge) return;
-  if (mode === "updating") {
-    badge.className = "text-[9.5px] px-1.5 py-0.2 rounded bg-amber-950/80 border border-amber-500/40 text-amber-300 font-mono font-bold flex items-center gap-1 transition-all";
-    badge.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-[8px] text-amber-400"></i><span>${customText || "피치 갱신 중..."}</span>`;
-  } else if (mode === "updated") {
-    badge.className = "text-[9.5px] px-1.5 py-0.2 rounded bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 font-mono font-bold flex items-center gap-1 transition-all";
-    badge.innerHTML = `<i class="fa-solid fa-circle-check text-[8px] text-emerald-400"></i><span>${customText || "실시간 반영 완료"}</span>`;
-    setTimeout(() => {
-      const cur = document.getElementById("suno-pitch-live-badge");
-      if (cur && cur.textContent.includes("실시간 반영 완료")) {
-        setSunoPitchLiveBadge("idle");
-      }
-    }, 1500);
-  } else {
-    badge.className = "text-[9.5px] px-1.5 py-0.2 rounded bg-purple-950/80 border border-purple-500/40 text-purple-300 font-mono font-bold flex items-center gap-1 transition-all";
-    badge.innerHTML = `<i class="fa-solid fa-bolt text-[8px] text-purple-400"></i><span>실시간 청음 반영</span>`;
-  }
-}
-
 async function playPitchPreviewAudition(options = {}) {
   const {
     preserveTime = false,
@@ -1007,11 +1114,18 @@ async function playPitchPreviewAudition(options = {}) {
     pitchPreviewAudio.pause();
     sunoPitchAuditioning = false;
     if (btn) btn.innerHTML = `<i class="fa-solid fa-headphones text-[10px]"></i> <span>피치 미리듣기</span>`;
+    updateAuditionNotice("idle", "미리듣기 일시정지", "피치 미리듣기가 정지되었습니다.");
     return;
   }
 
   const spd = dom.sunoSpeedSlider ? (parseFloat(dom.sunoSpeedSlider.value) || 1.0) : 1.0;
   const pitch = (state.pitchShift !== undefined) ? state.pitchShift : (dom.sunoPitchSlider ? (parseFloat(dom.sunoPitchSlider.value) || 0.0) : 0.0);
+
+  // If pitch is 0, play directly through real-time audio player
+  if (Math.abs(pitch) < 0.005) {
+    toggleSunoSpeedPlay();
+    return;
+  }
 
   // Exact section start position requested by user (unified position)
   let startSec = 0.0;
@@ -1030,11 +1144,14 @@ async function playPitchPreviewAudition(options = {}) {
   state.pitchAuditionStartSec = startSec;
 
   const sequence = ++sunoPitchSequence;
-  setSunoPitchLiveBadge("updating");
+
+  // Show "반영 중 (연산 중...)" status indicator while computing pitch
+  setSunoPitchLiveBadge("updating", "반영 중 (연산 중...)");
+  updateAuditionNotice("processing", "반영 중 (연산 중...)", `정밀 피치(${pitch > 0 ? "+" : ""}${pitch.toFixed(2)}키) 알고리즘 연산 중입니다. 완료 즉시 최우선 재생됩니다.`);
 
   if (!isLiveUpdate && btn) {
     btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-[10px]"></i> <span>피치 렌더링...</span>`;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-[10px]"></i> <span>반영 중...</span>`;
   }
 
   try {
@@ -1056,15 +1173,12 @@ async function playPitchPreviewAudition(options = {}) {
       throw new Error(data.detail || "미리듣기 렌더링 실패");
     }
 
-    if (state.audioElement && !state.audioElement.paused) {
-      state.audioElement.pause();
-    }
-
     if (!pitchPreviewAudio) {
       pitchPreviewAudio = new Audio();
       pitchPreviewAudio.addEventListener("ended", () => {
         sunoPitchAuditioning = false;
         if (btn) btn.innerHTML = `<i class="fa-solid fa-headphones text-[10px]"></i> <span>피치 미리듣기</span>`;
+        updateAuditionNotice("idle", "미리듣기 완료", "15초 구간 청음 완료. 다시 누르면 최우선 재생됩니다.");
       });
       pitchPreviewAudio.addEventListener("pause", () => {
         if (pitchPreviewAudio.currentTime >= (pitchPreviewAudio.duration || 15) - 0.2) {
@@ -1073,16 +1187,24 @@ async function playPitchPreviewAudition(options = {}) {
       });
     }
 
+    // TOP PRIORITY: Pause all other competing audios
+    enforceAuditionTopPriority(pitchPreviewAudio);
+
     const onReady = () => {
       if (autoPlay) {
+        pitchPreviewAudio.playbackRate = spd;
         pitchPreviewAudio.play().then(() => {
           sunoPitchAuditioning = true;
           if (btn) {
             btn.disabled = false;
             const sign = pitch > 0 ? "+" : "";
-            const pitchTxt = Math.abs(pitch) < 0.005 ? "원음" : `${sign}${pitch.toFixed(1)}키`;
+            const pitchTxt = `${sign}${pitch.toFixed(1)}키`;
             btn.innerHTML = `<i class="fa-solid fa-pause text-[10px] text-amber-300"></i> <span>피치 정지 (${pitchTxt})</span>`;
           }
+          // Switched to LIVE:
+          setSunoPitchLiveBadge("live", "LIVE 실시간 적용 중");
+          setSunoSpeedLiveBadge("live", "LIVE 실시간 적용 중");
+          updateAuditionNotice("live", "LIVE 실시간 적용 중", `정밀 음정(${pitch > 0 ? "+" : ""}${pitch.toFixed(2)}키) & 배속(${spd.toFixed(2)}x) 최우선 실시간 재생 중`);
         }).catch(err => console.warn("Pitch play warning:", err));
       }
     };
@@ -1093,16 +1215,15 @@ async function playPitchPreviewAudition(options = {}) {
     if (btn) {
       btn.disabled = false;
       const sign = pitch > 0 ? "+" : "";
-      const pitchTxt = Math.abs(pitch) < 0.005 ? "원음" : `${sign}${pitch.toFixed(1)}키`;
+      const pitchTxt = `${sign}${pitch.toFixed(1)}키`;
       btn.innerHTML = `<i class="fa-solid fa-pause text-[10px] text-amber-300"></i> <span>피치 정지 (${pitchTxt})</span>`;
     }
-
-    setSunoPitchLiveBadge("updated");
 
   } catch (err) {
     if (sequence !== sunoPitchSequence) return;
     console.error("Pitch audition error:", err);
     setSunoPitchLiveBadge("idle");
+    updateAuditionNotice("idle", "미리듣기 실패", `오류: ${err.message || err}`);
     if (btn) {
       btn.disabled = false;
       btn.innerHTML = `<i class="fa-solid fa-headphones text-[10px]"></i> <span>피치 미리듣기</span>`;
@@ -1116,12 +1237,12 @@ function triggerSunoPitchLiveUpdate(immediate = false) {
 
   const isAnyPlaying = sunoPitchAuditioning || (pitchPreviewAudio && !pitchPreviewAudio.paused) || (state.audioElement && !state.audioElement.paused) || state.isPlayingSection;
 
-  setSunoPitchLiveBadge("updating");
+  setSunoPitchLiveBadge("updating", "반영 중 (연산 중...)");
+  updateAuditionNotice("processing", "반영 중 (연산 중...)", "정밀 음정 연산 대기 중...");
   clearTimeout(sunoPitchLiveTimer);
 
-  const delay = immediate ? 15 : 140;
+  const delay = immediate ? 15 : 120;
   sunoPitchLiveTimer = setTimeout(async () => {
-    // If playing, OR if user stepped / clicked preset:
     if (isAnyPlaying || immediate) {
       await playPitchPreviewAudition({
         preserveTime: false,
