@@ -7525,6 +7525,7 @@ window.startBatchJob = async function() {
   const exportMp4 = document.getElementById('batch-opt-mp4')?.checked ?? false;
   const applyMastering = document.getElementById('batch-opt-mastering')?.checked ?? false;
   const uploadYoutube = document.getElementById('batch-opt-youtube')?.checked ?? true;
+  const useCooldown = document.getElementById('batch-opt-cooldown')?.checked ?? true;
 
   if (!exportMp3 && !exportMp4 && !uploadYoutube) {
     alert('MP3 저장, MP4 저장, 또는 유튜브 자동 업로드 중 최소 하나를 선택해주세요.');
@@ -7555,7 +7556,8 @@ window.startBatchJob = async function() {
         export_mp4: exportMp4,
         apply_mastering: applyMastering,
         upload_youtube: uploadYoutube,
-        youtube_privacy: 'unlisted'
+        youtube_privacy: 'unlisted',
+        use_cooldown: useCooldown
       })
     });
     const data = await resp.json();
@@ -7625,6 +7627,9 @@ function renderBatchStatus(batch) {
     } else if (batch.status === 'cancelled') {
       summaryEl.textContent = `🛑 사용자에 의해 중단됨 (${batch.completed}/${batch.total}개 완료)`;
       summaryEl.className = 'text-xs font-bold text-rose-400';
+    } else if (batch.cooldown_remaining > 0) {
+      summaryEl.innerHTML = `<span class="flex items-center gap-1.5 text-amber-300 font-bold"><i class="fa-solid fa-shield-halved animate-pulse text-amber-400"></i><span>유튜브 안티-스팸 쿨다운 중... (다음 곡까지 ${batch.cooldown_remaining}초)</span></span>`;
+      summaryEl.className = 'text-xs font-bold text-amber-300';
     } else {
       summaryEl.textContent = `⚡ 고속 처리 중... (${batch.completed}/${batch.total} 완료)`;
       summaryEl.className = 'text-xs font-bold text-amber-300';

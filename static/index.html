@@ -436,6 +436,10 @@
                     <span class="w-1.5 h-1.5 rounded-full bg-slate-500 inline-block"></span>
                     <span>미연동</span>
                   </span>
+                  <label class="flex items-center gap-1.5 cursor-pointer text-slate-300 hover:text-amber-300 select-none text-[10.5px] font-medium ml-1" title="연속 업로드 시 유튜브 스팸 방지(uploadLimitExceeded) 락을 회피하기 위해 곡 사이에 25~35초의 인간화 쿨다운 간격을 둡니다.">
+                    <input type="checkbox" id="batch-opt-cooldown" checked class="accent-amber-400 rounded">
+                    <span>🛡️ 인간화 쿨다운 (안티-스팸 안심 전송)</span>
+                  </label>
                 </div>
                 <button type="button" id="btn-yt-settings" onclick="openYouTubeSettingsModal()" class="btn-yt-settings px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer transition active:scale-[0.98]">
                   <i class="fa-brands fa-youtube text-xs"></i>

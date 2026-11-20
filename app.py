@@ -2941,6 +2941,7 @@ class BatchStartRequest(BaseModel):
     apply_mastering: bool = False  # Default MUST be False (unchecked) as requested
     upload_youtube: bool = True
     youtube_privacy: Optional[str] = "unlisted"
+    use_cooldown: bool = True
 
 def _process_batch_job(batch_id: str):
     with batch_lock:
@@ -2952,6 +2953,7 @@ def _process_batch_job(batch_id: str):
     export_mp4 = task.get("export_mp4", False)
     apply_mastering = task.get("apply_mastering", False)
     upload_youtube = task.get("upload_youtube", True)
+    use_cooldown = task.get("use_cooldown", True)
     youtube_privacy = task.get("youtube_privacy")
     if not youtube_privacy:
         cfg = get_youtube_config()
@@ -3262,6 +3264,22 @@ def _process_batch_job(batch_id: str):
                     item["mp4_name"] = mp4_path.name
                 task["completed"] += 1
 
+                # Human-like Cooldown Delay (인간화 안티-스팸 쿨다운 딜레이)
+                remaining_pending = [it for it in items[idx + 1:] if it["status"] == "pending"]
+                if upload_youtube and item.get("youtube_url") and remaining_pending and use_cooldown and not task.get("cancelled"):
+                    cooldown_sec = random.randint(25, 35)
+                    for rem in range(cooldown_sec, 0, -1):
+                        if task.get("cancelled"):
+                            break
+                        with batch_lock:
+                            task["cooldown_remaining"] = rem
+                            task["cooldown_total"] = cooldown_sec
+                            task["status_msg"] = f"🛡️ 유튜브 스팸 방지 쿨다운 중... (다음 곡까지 {rem}초 대기)"
+                        time.sleep(1)
+                    with batch_lock:
+                        task["cooldown_remaining"] = 0
+                        task["status_msg"] = None
+
         except Exception as exc:
             import traceback
             traceback.print_exc()
@@ -3444,6 +3462,10 @@ def start_batch_job(req: BatchStartRequest):
             "apply_mastering": req.apply_mastering,
             "upload_youtube": req.upload_youtube,
             "youtube_privacy": req.youtube_privacy or "unlisted",
+            "use_cooldown": req.use_cooldown,
+            "cooldown_remaining": 0,
+            "cooldown_total": 0,
+            "status_msg": None,
             "total": len(valid_urls),
             "completed": 0,
             "failed": 0,
