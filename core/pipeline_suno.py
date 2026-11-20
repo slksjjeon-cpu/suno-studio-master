@@ -100,6 +100,8 @@ def process_suno_mastering(
         safe_print(f"[PipelineSuno] Applying Pitch & Speed: pitch={pitch_shift:+.2f}st, speed={speed_ratio:.2f}x (keep_pitch={keep_pitch})")
         applied_ffmpeg = False
         if keep_pitch or has_pitch:
+            in_tmp = None
+            out_tmp = None
             try:
                 ffmpeg = get_ffmpeg_bin()
                 with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f_in, \
@@ -129,13 +131,15 @@ def process_suno_mastering(
                 stretched_data, _ = sf.read(out_tmp, dtype="float32")
                 cur_audio = stretched_data.T if stretched_data.ndim > 1 else stretched_data
                 applied_ffmpeg = True
-                for p in [in_tmp, out_tmp]:
-                    try:
-                        if os.path.exists(p): os.unlink(p)
-                    except Exception: pass
             except Exception as ex:
                 safe_print(f"[PipelineSuno] FFmpeg rubberband error: {ex}")
                 applied_ffmpeg = False
+            finally:
+                for p in [in_tmp, out_tmp]:
+                    if p:
+                        try:
+                            if os.path.exists(p): os.unlink(p)
+                        except Exception: pass
 
             if not applied_ffmpeg:
                 stretched_chans = [

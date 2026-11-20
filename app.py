@@ -1972,26 +1972,45 @@ async def export_audio_endpoint(req: ExportAudioRequest):
         final_audio_name = f"{clean_title}{tag_str}_{timestamp}.{ext}"
         final_audio_path = os.path.join(OUTPUTS_DIR, final_audio_name)
 
+        # Proactive disk cleanup if space is tight (< 1GB)
+        try:
+            free_bytes = shutil.disk_usage(OUTPUTS_DIR).free
+            if free_bytes < 1024 * 1024 * 1024:  # under 1GB
+                now_ts = time.time()
+                for old_aud in Path(OUTPUTS_DIR).glob("audition_*.wav"):
+                    if now_ts - old_aud.stat().st_mtime > 30:
+                        old_aud.unlink(missing_ok=True)
+                for old_batch in Path(OUTPUTS_DIR).glob("batch_*"):
+                    if old_batch.is_dir() and now_ts - old_batch.stat().st_mtime > 43200:
+                        shutil.rmtree(old_batch, ignore_errors=True)
+        except Exception:
+            pass
+
         ffmpeg = get_ffmpeg_bin()
 
+        af_str = None
         if abs(pitch_shift) > 0.005:
             pitch_scale = 2.0 ** (pitch_shift / 12.0)
             af_str = f"rubberband=pitch={pitch_scale:.8f}:tempo={speed:.6f}"
-        elif req.keep_pitch:
-            atempo_filters = []
-            cur_spd = speed
-            while cur_spd > 2.0:
-                atempo_filters.append("atempo=2.0")
-                cur_spd /= 2.0
-            while cur_spd < 0.5:
-                atempo_filters.append("atempo=0.5")
-                cur_spd /= 0.5
-            atempo_filters.append(f"atempo={cur_spd:.6f}")
-            af_str = ",".join(atempo_filters)
-        else:
-            af_str = f"asetrate=44100*{speed:.6f},aresample=44100"
+        elif abs(speed - 1.0) > 0.005:
+            if req.keep_pitch:
+                atempo_filters = []
+                cur_spd = speed
+                while cur_spd > 2.0:
+                    atempo_filters.append("atempo=2.0")
+                    cur_spd /= 2.0
+                while cur_spd < 0.5:
+                    atempo_filters.append("atempo=0.5")
+                    cur_spd /= 0.5
+                atempo_filters.append(f"atempo={cur_spd:.6f}")
+                af_str = ",".join(atempo_filters)
+            else:
+                af_str = f"asetrate=44100*{speed:.6f},aresample=44100"
 
-        cmd = [ffmpeg, "-y", "-i", audio_path, "-filter:a", af_str]
+        cmd = [ffmpeg, "-y", "-i", audio_path]
+        if af_str:
+            cmd.extend(["-filter:a", af_str])
+
         if ext == "wav":
             cmd.extend(["-c:a", "pcm_s16le", final_audio_path])
         else:
@@ -2013,7 +2032,10 @@ async def export_audio_endpoint(req: ExportAudioRequest):
     except HTTPException:
         raise
     except subprocess.CalledProcessError as cpe:
-        raise HTTPException(status_code=500, detail=f"FFmpeg 변환 오류: {cpe.stderr[-300:]}")
+        err_msg = cpe.stderr[-400:] if cpe.stderr else str(cpe)
+        if "No space left on device" in err_msg or "error closing file" in err_msg.lower():
+            err_msg = "C 드라이브 디스크 저장 공간이 부족하여 파일 생성이 중단되었습니다. 디스크 공간을 확보해 주세요."
+        raise HTTPException(status_code=500, detail=f"FFmpeg 변환 오류: {err_msg}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

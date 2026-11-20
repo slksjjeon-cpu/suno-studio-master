@@ -252,6 +252,9 @@ class StudioQueueManager:
                 duration_sec=duration_sec
             )
 
+            if not os.path.exists(output_filepath) or os.path.getsize(output_filepath) < 1000:
+                raise RuntimeError("마스터링 결과 파일 생성이 실패하였거나 손상되었습니다. (디스크 용량을 확인해주세요)")
+
             job["progress"] = 100
             job["status"] = JobStatus.COMPLETED
             job["progress_msg"] = "마스터링 완료!"
