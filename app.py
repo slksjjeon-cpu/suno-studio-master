@@ -3005,6 +3005,8 @@ def _process_batch_job(batch_id: str):
                 if not clean_title:
                     clean_title = f"YouTube_{vid_id}"
                 item["title"] = clean_title
+                if info.get("thumbnail"):
+                    item["image_url"] = info.get("thumbnail")
 
                 # Download video (MP4) if MP4 is requested, needed for YouTube upload, or for fast MP3 extraction
                 if export_mp4 or upload_youtube or not export_mp3:
@@ -3109,6 +3111,8 @@ def _process_batch_job(batch_id: str):
                 raw_song_title = dl_res.get("title") or suno_mp3_path.stem
                 clean_title = normalize_title(str(raw_song_title))[:80].strip(". \t\r\n") or f"Suno_{uuid.uuid4().hex[:6]}"
                 item["title"] = clean_title
+                if dl_res.get("image_url"):
+                    item["image_url"] = dl_res.get("image_url")
 
                 # Smart duplicate preservation for MP3
                 target_mp3 = get_safe_unique_filepath(batch_out_dir, f"{clean_title}.mp3", new_file_size=suno_mp3_path.stat().st_size)
@@ -3418,6 +3422,17 @@ def start_batch_job(req: BatchStartRequest):
     if not valid_urls:
         return JSONResponse({"ok": False, "error": "최소 1개 이상의 유효한 URL을 입력해주세요."}, status_code=400)
 
+    def _get_batch_thumb(u_raw: str):
+        if not u_raw:
+            return None
+        sm = re.search(r'song/([0-9a-fA-F-]+)', u_raw)
+        if sm:
+            return f"https://cdn2.suno.ai/image_{sm.group(1)}.jpeg"
+        ym = re.search(r'(?:youtu\.be/|v=|/embed/|/v/)([a-zA-Z0-9_-]{11})', u_raw)
+        if ym:
+            return f"https://img.youtube.com/vi/{ym.group(1)}/mqdefault.jpg"
+        return None
+
     batch_id = f"batch_{uuid.uuid4().hex[:8]}"
     with batch_lock:
         BATCH_TASKS[batch_id] = {
@@ -3438,6 +3453,7 @@ def start_batch_job(req: BatchStartRequest):
                     "url": u,
                     "status": "pending",
                     "title": "",
+                    "image_url": _get_batch_thumb(u),
                     "progress": 0,
                     "message": "대기 중...",
                     "mp3_url": None,

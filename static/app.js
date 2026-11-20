@@ -7003,13 +7003,23 @@ function triggerAutoDownload(url, filename) {
   }
 }
 
-function createBatchRowElement(list, val = '', title = '') {
+function createBatchRowElement(list, val = '', title = '', imageUrl = '') {
   const idx = list.children.length + 1;
   const row = document.createElement('div');
   row.className = 'batch-url-row flex items-center gap-2 bg-[#090c14] border border-slate-800 rounded-lg p-1.5 transition focus-within:border-amber-400/80 hover:border-slate-700';
+  if (title) row.dataset.title = title;
+  if (imageUrl) row.dataset.imageUrl = imageUrl;
+
+  let rowThumb = imageUrl;
+  if (!rowThumb && val) {
+    const sm = val.match(/song\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+    if (sm) rowThumb = `https://cdn2.suno.ai/image_${sm[1]}.jpeg`;
+  }
+  const thumbEl = rowThumb ? `<img src="${rowThumb}" alt="Thumb" class="w-6 h-6 rounded object-cover shrink-0 border border-white/10" onerror="this.remove()">` : '';
   const titleBadge = title ? `<span class="batch-song-title text-[10px] text-cyan-300 font-bold truncate max-w-[130px] px-1.5 py-0.5 rounded bg-cyan-950/70 border border-cyan-800/60 shrink-0 select-none" title="${title.replace(/"/g, '&quot;')}">${title.replace(/</g, '&lt;')}</span>` : '';
   row.innerHTML = `
     <span class="batch-row-num text-[10px] font-mono font-bold text-amber-400/90 w-5 text-center shrink-0 select-none">${idx}</span>
+    ${thumbEl}
     ${titleBadge}
     <input type="text" 
       placeholder="YouTube, Suno 곡 링크 (https://...)" 
@@ -7191,7 +7201,7 @@ window.importPlaylistFromInput = async function() {
     }
 
     data.songs.forEach(song => {
-      createBatchRowElement(list, song.url, song.title);
+      createBatchRowElement(list, song.url, song.title, song.image_url);
     });
 
     renumberBatchRows();
@@ -7338,7 +7348,7 @@ window.loadSunoPlaylistIntoBatch = async function(playlistUrl, replaceRow = null
     }
 
     data.songs.forEach(song => {
-      createBatchRowElement(list, song.url, song.title);
+      createBatchRowElement(list, song.url, song.title, song.image_url);
     });
 
     renumberBatchRows();
@@ -7652,45 +7662,81 @@ function renderBatchStatus(batch) {
     const title = it.title || it.url;
     const wasAutoDownloaded = isDone && ((it.mp4_url && batchAutoDownloadedUrls.has(it.mp4_url)) || (it.mp3_url && batchAutoDownloadedUrls.has(it.mp3_url)));
 
+    let thumbUrl = it.image_url || null;
+    let sunoId = null;
+    if (it.url) {
+      const sm = it.url.match(/song\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+      if (sm) {
+        sunoId = sm[1];
+        if (!thumbUrl) thumbUrl = `https://cdn2.suno.ai/image_${sunoId}.jpeg`;
+      } else {
+        const ym = it.url.match(/(?:youtu\.be\/|v=|\/embed\/|\/v\/)([a-zA-Z0-9_-]{11})/);
+        if (ym && !thumbUrl) {
+          thumbUrl = `https://img.youtube.com/vi/${ym[1]}/mqdefault.jpg`;
+        }
+      }
+    }
+
     return `
-      <div class="daw-inset p-2 rounded-lg flex flex-col gap-1.5 bg-[#090d14] border ${isDone ? 'border-emerald-500/30' : (isErr ? 'border-rose-500/30' : 'border-slate-800')}">
-        <div class="flex items-center justify-between text-xs gap-2">
-          <div class="flex items-center gap-1.5 truncate">
-            <span class="font-mono text-[10px] text-slate-400 font-bold">[${it.index + 1}]</span>
-            <span class="font-bold text-white truncate max-w-[260px]" title="${title.replace(/"/g, '&quot;')}">${title}</span>
-          </div>
-          <div class="flex items-center gap-1.5 shrink-0">
-            ${wasAutoDownloaded ? `<span class="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">✨ 자동 다운로드됨</span>` : ''}
-            <span class="text-[10px] font-mono font-bold ${statusColor}">${it.message || it.status}</span>
-          </div>
-        </div>
-        
-        <div class="w-full bg-slate-900 rounded-full h-1 overflow-hidden">
-          <div class="h-1 rounded-full transition-all duration-300 ${isDone ? 'bg-emerald-400 w-full' : (isErr ? 'bg-rose-500 w-full' : 'bg-amber-400')}" style="width: ${it.progress}%"></div>
+      <div class="daw-inset p-2.5 rounded-xl flex items-center gap-3 bg-[#090d14] border ${isDone ? 'border-emerald-500/30' : (isErr ? 'border-rose-500/30' : 'border-slate-800')} hover:border-slate-700/80 transition-all shadow-sm">
+        <!-- Suno Song Thumbnail (Album Art) -->
+        <div class="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-slate-900 border border-white/10 shrink-0 flex items-center justify-center shadow-md group">
+          ${thumbUrl ? `
+            <img src="${thumbUrl}" alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" onerror="this.onerror=null; ${sunoId ? `this.src='https://cdn1.suno.ai/image_${sunoId}.png';` : `this.style.display='none'; this.nextElementSibling.classList.remove('hidden');`}">
+            <div class="hidden w-full h-full flex flex-col items-center justify-center bg-slate-800/80 text-slate-400">
+              <i class="fa-solid fa-music text-base text-slate-500"></i>
+              <span class="text-[8px] font-mono text-slate-500 mt-0.5">Suno</span>
+            </div>
+          ` : `
+            <div class="w-full h-full flex flex-col items-center justify-center bg-slate-800/80 text-slate-400">
+              <i class="fa-solid fa-music text-base text-slate-500"></i>
+              <span class="text-[8.5px] font-mono text-slate-500 mt-0.5">Suno</span>
+            </div>
+          `}
+          <span class="absolute bottom-1 right-1 px-1.5 py-0.2 rounded bg-black/80 backdrop-blur-xs text-[9px] font-mono font-bold text-amber-300 select-none shadow border border-white/10">
+            [${it.index + 1}]
+          </span>
         </div>
 
-        ${isDone ? `
-          <div class="flex items-center justify-end gap-2 pt-1 border-t border-white/5 flex-wrap">
-            ${it.youtube_url ? `
-              <a href="${it.youtube_url}" target="_blank" rel="noopener noreferrer" class="btn-yt-view px-3 py-1.5 rounded-xl text-[11px] font-bold font-sans transition flex items-center gap-1.5 shadow-sm active:scale-[0.98]" style="background-color: #f04452 !important; color: #ffffff !important; border: none !important; text-decoration: none !important;">
-                <i class="fa-brands fa-youtube text-xs" style="color: #ffffff !important;"></i>
-                <span style="color: #ffffff !important; font-weight: 700 !important;">YouTube 보기</span>
-              </a>
-            ` : (it.youtube_error ? `
-              <span class="text-[10px] text-rose-300 font-sans font-medium px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/20" title="${(it.youtube_error || '').replace(/"/g, '&quot;')}">⚠️ ${it.youtube_error}</span>
-            ` : '')}
-            ${it.mp3_url ? `
-              <a href="${it.mp3_url}" download="${(it.mp3_name || 'audio.mp3').replace(/"/g, '&quot;')}" class="btn-toss-secondary px-3 py-1.5 rounded-xl text-[11px] font-semibold font-sans transition flex items-center gap-1.5 active:scale-[0.98]">
-                <i class="fa-solid fa-music"></i> MP3 다운로드
-              </a>
-            ` : ''}
-            ${it.mp4_url ? `
-              <a href="${it.mp4_url}" download="${(it.mp4_name || 'video.mp4').replace(/"/g, '&quot;')}" class="btn-toss-secondary px-3 py-1.5 rounded-xl text-[11px] font-semibold font-sans transition flex items-center gap-1.5 active:scale-[0.98]" title="원본 고화질 MP4 파일 다운로드">
-                <i class="fa-solid fa-file-video text-rose-500"></i> 원본 MP4 다운로드
-              </a>
-            ` : ''}
+        <!-- Info, Progress & Action Hub -->
+        <div class="flex-1 min-w-0 flex flex-col gap-1.5 justify-center">
+          <div class="flex items-center justify-between text-xs gap-2">
+            <div class="flex items-center gap-1.5 truncate">
+              <span class="font-bold text-white truncate text-[11.5px]" title="${title.replace(/"/g, '&quot;')}">${title}</span>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              ${wasAutoDownloaded ? `<span class="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">✨ 자동 다운로드됨</span>` : ''}
+              <span class="text-[10px] font-mono font-bold ${statusColor}">${it.message || it.status}</span>
+            </div>
           </div>
-        ` : ''}
+          
+          <div class="w-full bg-slate-900 rounded-full h-1 overflow-hidden">
+            <div class="h-1 rounded-full transition-all duration-300 ${isDone ? 'bg-emerald-400 w-full' : (isErr ? 'bg-rose-500 w-full' : 'bg-amber-400')}" style="width: ${it.progress}%"></div>
+          </div>
+
+          ${isDone ? `
+            <div class="flex items-center justify-end gap-2 pt-1 border-t border-white/5 flex-wrap">
+              ${it.youtube_url ? `
+                <a href="${it.youtube_url}" target="_blank" rel="noopener noreferrer" class="btn-yt-view px-3 py-1.5 rounded-xl text-[11px] font-bold font-sans transition flex items-center gap-1.5 shadow-sm active:scale-[0.98]" style="background-color: #f04452 !important; color: #ffffff !important; border: none !important; text-decoration: none !important;">
+                  <i class="fa-brands fa-youtube text-xs" style="color: #ffffff !important;"></i>
+                  <span style="color: #ffffff !important; font-weight: 700 !important;">YouTube 보기</span>
+                </a>
+              ` : (it.youtube_error ? `
+                <span class="text-[10px] text-rose-300 font-sans font-medium px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/20" title="${(it.youtube_error || '').replace(/"/g, '&quot;')}">⚠️ ${it.youtube_error}</span>
+              ` : '')}
+              ${it.mp3_url ? `
+                <a href="${it.mp3_url}" download="${(it.mp3_name || 'audio.mp3').replace(/"/g, '&quot;')}" class="btn-toss-secondary px-3 py-1.5 rounded-xl text-[11px] font-semibold font-sans transition flex items-center gap-1.5 active:scale-[0.98]">
+                  <i class="fa-solid fa-music"></i> MP3 다운로드
+                </a>
+              ` : ''}
+              ${it.mp4_url ? `
+                <a href="${it.mp4_url}" download="${(it.mp4_name || 'video.mp4').replace(/"/g, '&quot;')}" class="btn-toss-secondary px-3 py-1.5 rounded-xl text-[11px] font-semibold font-sans transition flex items-center gap-1.5 active:scale-[0.98]" title="원본 고화질 MP4 파일 다운로드">
+                  <i class="fa-solid fa-file-video text-rose-500"></i> 원본 MP4 다운로드
+                </a>
+              ` : ''}
+            </div>
+          ` : ''}
+        </div>
       </div>
     `;
   }).join('');
