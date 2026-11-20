@@ -38,6 +38,7 @@ import re
 import asyncio
 import shutil
 import time
+import random
 import uuid
 import base64
 import socket
@@ -2964,7 +2965,7 @@ def _process_batch_job(batch_id: str):
     batch_out_dir.mkdir(parents=True, exist_ok=True)
 
     items = task["items"]
-    for item in items:
+    for idx, item in enumerate(items):
         with batch_lock:
             if task.get("cancelled", False):
                 item["status"] = "cancelled"
@@ -3265,7 +3266,8 @@ def _process_batch_job(batch_id: str):
                 task["completed"] += 1
 
                 # Human-like Cooldown Delay (인간화 안티-스팸 쿨다운 딜레이)
-                remaining_pending = [it for it in items[idx + 1:] if it["status"] == "pending"]
+                cur_idx = item.get("index", idx)
+                remaining_pending = [it for it in items[cur_idx + 1:] if it.get("status") == "pending"]
                 if upload_youtube and item.get("youtube_url") and remaining_pending and use_cooldown and not task.get("cancelled"):
                     cooldown_sec = random.randint(25, 35)
                     for rem in range(cooldown_sec, 0, -1):
