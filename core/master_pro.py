@@ -1,5 +1,6 @@
 import os
 import time
+import shutil
 import numpy as np
 import soundfile as sf
 import scipy.signal as signal
@@ -323,9 +324,37 @@ def master_audio_pro(
     output_lufs = calculate_integrated_lufs(mastered, sr)
 
     # Save to disk
-    os.makedirs(os.path.dirname(output_filepath), exist_ok=True)
+    out_dir = os.path.dirname(os.path.abspath(output_filepath))
+    os.makedirs(out_dir, exist_ok=True)
+    
+    # Pre-check disk space
+    try:
+        _, _, free_bytes = shutil.disk_usage(out_dir)
+        free_mb = free_bytes / (1024 * 1024)
+        if free_mb < 30.0:
+            raise RuntimeError(
+                f"C 드라이브 용량 부족 (현재 {free_mb:.1f}MB 남음): 마스터링 고음질 WAV 파일 저장을 위한 디스크 공간이 부족합니다. C 드라이브 용량을 확보해주세요."
+            )
+    except Exception as d_err:
+        if "C 드라이브 용량 부족" in str(d_err):
+            raise d_err
+
     save_data = mastered.T if mastered.ndim > 1 else mastered
-    sf.write(output_filepath, save_data, sr, format="WAV")
+    save_data = np.ascontiguousarray(save_data, dtype=np.float32)
+
+    try:
+        sf.write(output_filepath, save_data, sr, format="WAV", subtype="PCM_16")
+    except Exception as write_err:
+        try:
+            _, _, free_bytes = shutil.disk_usage(out_dir)
+            free_mb = free_bytes / (1024 * 1024)
+            if free_mb < 100.0:
+                raise RuntimeError(
+                    f"C 드라이브 용량 부족 (현재 {free_mb:.1f}MB 남음): 디스크 공간 부족으로 인해 WAV 저장을 완료할 수 없습니다. C 드라이브 용량을 확보해주세요."
+                ) from write_err
+        except Exception:
+            pass
+        raise write_err
 
     elapsed = round(time.time() - t_start, 2)
     try:

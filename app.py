@@ -787,6 +787,10 @@ def get_health():
 
 @app.get("/api/system-status")
 def get_system_status():
+    import shutil
+    disk_total, disk_used, disk_free = shutil.disk_usage(".")
+    free_mb = round(disk_free / (1024 * 1024), 1)
+    free_gb = round(disk_free / (1024 * 1024 * 1024), 2)
     return {
         "gpu": {
             "name": "NVIDIA GeForce RTX 2060 Mobile (Detected)",
@@ -795,6 +799,12 @@ def get_system_status():
             "cuda_available": True
         },
         "hardware": "MSI GL65 Leopard / i7-10750H / 32GB RAM",
+        "disk": {
+            "free_mb": free_mb,
+            "free_gb": free_gb,
+            "low_space": free_mb < 500.0,
+            "critical_space": free_mb < 100.0
+        },
         "queue_length": len(queue_manager.queue),
         "is_busy": queue_manager.current_job_id is not None,
         "current_job": queue_manager.current_job_id

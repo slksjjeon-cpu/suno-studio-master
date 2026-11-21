@@ -226,6 +226,19 @@ class StudioQueueManager:
                 filename = candidate_filename
             output_filepath = os.path.join(self.output_dir, filename)
 
+            # Pre-flight check: ensure enough disk space is available
+            import shutil
+            try:
+                _, _, free_bytes = shutil.disk_usage(self.output_dir)
+                free_mb = free_bytes / (1024 * 1024)
+                if free_mb < 50.0:
+                    raise RuntimeError(
+                        f"C 드라이브 용량 부족 (현재 잔여: {free_mb:.1f}MB): 완곡 마스터링 렌더링을 위해 최소 200MB 이상의 여유 공간이 필요합니다. C 드라이브 용량을 정리해주세요."
+                    )
+            except Exception as d_chk_err:
+                if "C 드라이브 용량 부족" in str(d_chk_err):
+                    raise d_chk_err
+
             job["progress"] = 30
             job["progress_msg"] = "초고역대 비가청 워터마크 & 위상 지문 제거 중..."
             time.sleep(0.15)
