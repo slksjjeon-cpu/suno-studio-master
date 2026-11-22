@@ -532,9 +532,31 @@ function setupEventListeners() {
       }
     });
 
+    const singleThumbEl = document.getElementById("suno-single-input-thumb");
+    const updateSinglePreview = (url) => {
+      if (!singleThumbEl) return;
+      const { thumb, sunoId } = extractSongThumb(url);
+      if (thumb) {
+        singleThumbEl.src = thumb;
+        singleThumbEl.dataset.triedPng = '';
+        singleThumbEl.onerror = function() {
+          if (sunoId && !this.dataset.triedPng) {
+            this.dataset.triedPng = '1';
+            this.src = `https://cdn1.suno.ai/image_${sunoId}.png`;
+          } else {
+            this.classList.add("hidden");
+          }
+        };
+        singleThumbEl.classList.remove("hidden");
+      } else {
+        singleThumbEl.classList.add("hidden");
+      }
+    };
+
     // Also trigger on input event (handles mouse right-click paste, autofill, drag, etc.)
     dom.sunoUrlInput.addEventListener("input", () => {
       const val = dom.sunoUrlInput.value.trim();
+      updateSinglePreview(val);
       if (/suno\.(com|ai)|([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})|(youtube\.com|youtu\.be)/i.test(val)) {
         clearTimeout(sunoInputTimer);
         sunoInputTimer = setTimeout(() => {
@@ -7003,6 +7025,68 @@ function triggerAutoDownload(url, filename) {
   }
 }
 
+function extractSongThumb(url, explicitImg = '') {
+  if (explicitImg) return { thumb: explicitImg, sunoId: null };
+  if (!url) return { thumb: null, sunoId: null };
+  const sm = url.match(/(?:suno\.(?:com|ai)\/song\/|\b)([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b/i);
+  if (sm) {
+    const sunoId = sm[1];
+    return {
+      thumb: `https://cdn2.suno.ai/image_${sunoId}.jpeg`,
+      sunoId: sunoId
+    };
+  }
+  const ym = url.match(/(?:youtu\.be\/|v=|\/embed\/|\/v\/)([a-zA-Z0-9_-]{11})/);
+  if (ym) {
+    return {
+      thumb: `https://img.youtube.com/vi/${ym[1]}/mqdefault.jpg`,
+      sunoId: null
+    };
+  }
+  return { thumb: null, sunoId: null };
+}
+
+function updateRowThumbnail(row, val) {
+  if (!row) return;
+  const input = row.querySelector('.batch-url-input');
+  const currentVal = val !== undefined ? val : (input ? input.value.trim() : '');
+  const { thumb, sunoId } = extractSongThumb(currentVal, row.dataset.imageUrl);
+
+  let thumbEl = row.querySelector('.batch-row-thumb');
+  if (thumb) {
+    if (!thumbEl) {
+      thumbEl = document.createElement('img');
+      thumbEl.className = 'batch-row-thumb w-8 h-8 rounded-md object-cover shrink-0 border border-white/20 shadow-xs transition-transform duration-200 hover:scale-105';
+      const numSpan = row.querySelector('.batch-row-num');
+      if (numSpan && numSpan.nextSibling) {
+        row.insertBefore(thumbEl, numSpan.nextSibling);
+      } else {
+        row.prepend(thumbEl);
+      }
+    }
+    thumbEl.alt = 'Thumbnail';
+    thumbEl.onerror = function() {
+      if (sunoId && !this.dataset.triedPng) {
+        this.dataset.triedPng = '1';
+        this.src = `https://cdn1.suno.ai/image_${sunoId}.png`;
+      } else if (sunoId && !this.dataset.triedLarge) {
+        this.dataset.triedLarge = '1';
+        this.src = `https://cdn2.suno.ai/image_large_${sunoId}.jpeg`;
+      } else {
+        this.remove();
+      }
+    };
+    if (thumbEl.src !== thumb) {
+      thumbEl.dataset.triedPng = '';
+      thumbEl.dataset.triedLarge = '';
+      thumbEl.src = thumb;
+    }
+    thumbEl.style.display = '';
+  } else if (thumbEl) {
+    thumbEl.remove();
+  }
+}
+
 function createBatchRowElement(list, val = '', title = '', imageUrl = '') {
   const idx = list.children.length + 1;
   const row = document.createElement('div');
@@ -7010,12 +7094,8 @@ function createBatchRowElement(list, val = '', title = '', imageUrl = '') {
   if (title) row.dataset.title = title;
   if (imageUrl) row.dataset.imageUrl = imageUrl;
 
-  let rowThumb = imageUrl;
-  if (!rowThumb && val) {
-    const sm = val.match(/song\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
-    if (sm) rowThumb = `https://cdn2.suno.ai/image_${sm[1]}.jpeg`;
-  }
-  const thumbEl = rowThumb ? `<img src="${rowThumb}" alt="Thumb" class="w-6 h-6 rounded object-cover shrink-0 border border-white/10" onerror="this.remove()">` : '';
+  const { thumb, sunoId } = extractSongThumb(val, imageUrl);
+  const thumbEl = thumb ? `<img src="${thumb}" alt="Thumb" class="batch-row-thumb w-8 h-8 rounded-md object-cover shrink-0 border border-white/20 shadow-xs transition-transform duration-200 hover:scale-105" onerror="if(!this.dataset.triedPng && '${sunoId || ''}'){ this.dataset.triedPng='1'; this.src='https://cdn1.suno.ai/image_${sunoId}.png'; } else if(!this.dataset.triedLarge && '${sunoId || ''}'){ this.dataset.triedLarge='1'; this.src='https://cdn2.suno.ai/image_large_${sunoId}.jpeg'; } else { this.remove(); }">` : '';
   const titleBadge = title ? `<span class="batch-song-title text-[10px] text-cyan-300 font-bold truncate max-w-[130px] px-1.5 py-0.5 rounded bg-cyan-950/70 border border-cyan-800/60 shrink-0 select-none" title="${title.replace(/"/g, '&quot;')}">${title.replace(/</g, '&lt;')}</span>` : '';
   row.innerHTML = `
     <span class="batch-row-num text-[10px] font-mono font-bold text-amber-400/90 w-5 text-center shrink-0 select-none">${idx}</span>
@@ -7040,8 +7120,12 @@ function createBatchRowElement(list, val = '', title = '', imageUrl = '') {
 
 window.handleBatchUrlInput = function(inp) {
   const val = inp.value.trim();
+  const row = inp.closest('.batch-url-row');
+  if (row) {
+    updateRowThumbnail(row, val);
+  }
   if (/suno\.(com|ai)\/playlist\/[0-9a-f-]+/i.test(val)) {
-    loadSunoPlaylistIntoBatch(val, inp.closest('.batch-url-row'));
+    loadSunoPlaylistIntoBatch(val, row);
     return;
   }
   updateBatchBadgeCount();
@@ -7670,7 +7754,7 @@ function renderBatchStatus(batch) {
     let thumbUrl = it.image_url || null;
     let sunoId = null;
     if (it.url) {
-      const sm = it.url.match(/song\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+      const sm = it.url.match(/(?:suno\.(?:com|ai)\/song\/|\b)([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b/i);
       if (sm) {
         sunoId = sm[1];
         if (!thumbUrl) thumbUrl = `https://cdn2.suno.ai/image_${sunoId}.jpeg`;
@@ -7687,7 +7771,7 @@ function renderBatchStatus(batch) {
         <!-- Suno Song Thumbnail (Album Art) -->
         <div class="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-slate-900 border border-white/10 shrink-0 flex items-center justify-center shadow-md group">
           ${thumbUrl ? `
-            <img src="${thumbUrl}" alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" onerror="this.onerror=null; ${sunoId ? `this.src='https://cdn1.suno.ai/image_${sunoId}.png';` : `this.style.display='none'; this.nextElementSibling.classList.remove('hidden');`}">
+            <img src="${thumbUrl}" alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" onerror="if(!this.dataset.f1 && '${sunoId || ''}'){ this.dataset.f1='1'; this.src='https://cdn1.suno.ai/image_${sunoId}.png'; } else if(!this.dataset.f2 && '${sunoId || ''}'){ this.dataset.f2='1'; this.src='https://cdn2.suno.ai/image_large_${sunoId}.jpeg'; } else { this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.classList.remove('hidden'); }">
             <div class="hidden w-full h-full flex flex-col items-center justify-center bg-slate-800/80 text-slate-400">
               <i class="fa-solid fa-music text-base text-slate-500"></i>
               <span class="text-[8px] font-mono text-slate-500 mt-0.5">Suno</span>
