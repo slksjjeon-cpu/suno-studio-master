@@ -1909,7 +1909,7 @@ async function pollAnalysisTask(taskId) {
 
   return new Promise((resolve, reject) => {
     let failRetries = 0;
-    const maxRetries = 10;
+    const maxRetries = 15; // 15 seconds tolerance for cloud wakeups / rate limits
     const timer = setInterval(async () => {
       try {
         const res = await fetch(`/api/analysis-status/${taskId}`);
@@ -1917,6 +1917,7 @@ async function pollAnalysisTask(taskId) {
           failRetries++;
           if (failRetries <= maxRetries) {
             console.warn(`Analysis status retry ${failRetries}/${maxRetries} (${res.status})`);
+            dom.analysisStageText.textContent = `클라우드 서버 응답 대기 중... (${failRetries}/${maxRetries})`;
             return;
           }
           throw new Error("분석 상태 확인 실패 (서버 응답 오류: " + res.status + ")");
@@ -1942,11 +1943,16 @@ async function pollAnalysisTask(taskId) {
           reject(new Error(data.error || "분석 실패"));
         }
       } catch (e) {
+        failRetries++;
+        if (failRetries <= maxRetries) {
+          console.warn(`Analysis status network error retry ${failRetries}/${maxRetries}`);
+          return;
+        }
         clearInterval(timer);
         dom.analysisProgressBox.classList.add("hidden");
         reject(e);
       }
-    }, 300);
+    }, 1000);
   });
 }
 

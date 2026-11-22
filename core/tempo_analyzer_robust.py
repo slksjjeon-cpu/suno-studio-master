@@ -20,13 +20,20 @@ def analyze_dynamic_tempo_robust(y: np.ndarray, sr: int) -> Dict[str, Any]:
             "drift_percent": 0.0, "is_accelerating": False, "timeline_points": []
         }
 
+    # Low-memory downsampling for tempo analysis (22kHz-24kHz standard for beat detection)
+    if sr > 24000:
+        y_mono = y_mono[::2]
+        sr_tempo = sr // 2
+    else:
+        sr_tempo = sr
+
     # 1. Onset Strength Envelope
     hop_length = 512
-    onset_env = librosa.onset.onset_strength(y=y_mono, sr=sr, hop_length=hop_length)
+    onset_env = librosa.onset.onset_strength(y=y_mono, sr=sr_tempo, hop_length=hop_length)
 
     # 2. Global Base Tempo with Prior (Avoid octave jumps)
     # Set a log-normal prior centered at 115 BPM to prevent 190+ or <55 outlier detections
-    prior = librosa.feature.tempo(onset_envelope=onset_env, sr=sr, hop_length=hop_length, 
+    prior = librosa.feature.tempo(onset_envelope=onset_env, sr=sr_tempo, hop_length=hop_length, 
                                   start_bpm=115.0, std_bpm=1.0, max_tempo=180.0)
     base_tempo = float(prior[0]) if isinstance(prior, np.ndarray) and len(prior) > 0 else float(prior)
 
@@ -38,8 +45,8 @@ def analyze_dynamic_tempo_robust(y: np.ndarray, sr: int) -> Dict[str, Any]:
     base_tempo = round(base_tempo, 1)
 
     # 3. Dynamic Fourier Tempogram
-    tempogram = librosa.feature.tempogram(onset_envelope=onset_env, sr=sr, hop_length=hop_length, win_length=384)
-    tempo_bins = librosa.tempo_frequencies(tempogram.shape[0], sr=sr, hop_length=hop_length)
+    tempogram = librosa.feature.tempogram(onset_envelope=onset_env, sr=sr_tempo, hop_length=hop_length, win_length=384)
+    tempo_bins = librosa.tempo_frequencies(tempogram.shape[0], sr=sr_tempo, hop_length=hop_length)
 
     # Focus only on the octave window [base_tempo * 0.75, base_tempo * 1.35]
     valid_mask = (tempo_bins >= base_tempo * 0.75) & (tempo_bins <= base_tempo * 1.35)
@@ -47,7 +54,7 @@ def analyze_dynamic_tempo_robust(y: np.ndarray, sr: int) -> Dict[str, Any]:
         valid_mask = (tempo_bins >= 50.0) & (tempo_bins <= 160.0)
 
     # Time axis in seconds
-    times = librosa.times_like(tempogram, sr=sr, hop_length=hop_length)
+    times = librosa.times_like(tempogram, sr=sr_tempo, hop_length=hop_length)
 
     # Slice into 8 to 15 time segments across the song
     num_slices = max(5, min(16, int(duration // 2.5)))
