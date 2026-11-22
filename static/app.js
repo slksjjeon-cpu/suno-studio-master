@@ -1899,8 +1899,9 @@ function updatePlayheadPosition(currentTime) {
   dom.audioTimeCurrent.textContent = `재생 중: ${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
 }
 
-// Polling analysis task
+// Polling analysis task with smart 429 Rate Limit backoff & retry
 async function pollAnalysisTask(taskId) {
+  isAnalysisActive = true;
   dom.analysisProgressBox.classList.remove("hidden");
   dom.analysisPercentText.textContent = "0%";
   dom.analysisProgressBar.style.width = "0%";
@@ -1909,19 +1910,46 @@ async function pollAnalysisTask(taskId) {
 
   return new Promise((resolve, reject) => {
     let failRetries = 0;
-    const maxRetries = 15; // 15 seconds tolerance for cloud wakeups / rate limits
-    const timer = setInterval(async () => {
+    const maxRetries = 30; // Up to 60 seconds tolerance for cloud Rate Limit
+    let timerId = null;
+
+    const cleanup = () => {
+      if (timerId) clearTimeout(timerId);
+      isAnalysisActive = false;
+    };
+
+    const doPoll = async () => {
       try {
         const res = await fetch(`/api/analysis-status/${taskId}`);
+
+        // Handle 429 Too Many Requests specifically
+        if (res.status === 429) {
+          failRetries++;
+          console.warn(`Analysis status hit 429 (Rate limit). Backing off 3s... (${failRetries}/${maxRetries})`);
+          dom.analysisStageText.textContent = `클라우드 서버 대기열 순서 대기 중... (${failRetries})`;
+          if (failRetries > maxRetries) {
+            cleanup();
+            dom.analysisProgressBox.classList.add("hidden");
+            reject(new Error("분석 대기 시간 초과 (429 Rate Limit)"));
+            return;
+          }
+          timerId = setTimeout(doPoll, 3000);
+          return;
+        }
+
         if (!res.ok) {
           failRetries++;
           if (failRetries <= maxRetries) {
             console.warn(`Analysis status retry ${failRetries}/${maxRetries} (${res.status})`);
-            dom.analysisStageText.textContent = `클라우드 서버 응답 대기 중... (${failRetries}/${maxRetries})`;
+            dom.analysisStageText.textContent = `클라우드 서버 연결 확인 중... (${failRetries}/${maxRetries})`;
+            timerId = setTimeout(doPoll, 2000);
             return;
           }
+          cleanup();
+          dom.analysisProgressBox.classList.add("hidden");
           throw new Error("분석 상태 확인 실패 (서버 응답 오류: " + res.status + ")");
         }
+
         failRetries = 0;
         const data = await res.json();
 
@@ -1934,25 +1962,33 @@ async function pollAnalysisTask(taskId) {
         }
 
         if (data.status === "completed") {
-          clearInterval(timer);
+          cleanup();
           setTimeout(() => dom.analysisProgressBox.classList.add("hidden"), 600);
           resolve(data.data);
+          return;
         } else if (data.status === "failed") {
-          clearInterval(timer);
+          cleanup();
           dom.analysisProgressBox.classList.add("hidden");
           reject(new Error(data.error || "분석 실패"));
+          return;
         }
+
+        // Schedule next check smoothly
+        timerId = setTimeout(doPoll, 1500);
       } catch (e) {
         failRetries++;
         if (failRetries <= maxRetries) {
           console.warn(`Analysis status network error retry ${failRetries}/${maxRetries}`);
+          timerId = setTimeout(doPoll, 2500);
           return;
         }
-        clearInterval(timer);
+        cleanup();
         dom.analysisProgressBox.classList.add("hidden");
         reject(e);
       }
-    }, 1000);
+    };
+
+    timerId = setTimeout(doPoll, 400);
   });
 }
 
@@ -2847,9 +2883,32 @@ async function enqueuePreviewMastering() {
   }
 }
 
+let queuePollTimer = null;
+let isAnalysisActive = false;
+
 function startQueuePolling() {
   pollQueue();
-  setInterval(pollQueue, 1500);
+  scheduleNextQueuePoll();
+}
+
+function scheduleNextQueuePoll() {
+  if (queuePollTimer) clearTimeout(queuePollTimer);
+  // While audio import/analysis is active, back off queue polling to avoid 429 Rate Limits
+  if (isAnalysisActive) {
+    queuePollTimer = setTimeout(scheduleNextQueuePoll, 6000);
+    return;
+  }
+  const hasActiveJob = state.jobs && state.jobs.some(j => j.status === "processing" || j.status === "pending" || j.status === "queued");
+  const delay = hasActiveJob ? 2500 : 8000;
+  queuePollTimer = setTimeout(async () => {
+    try {
+      await pollQueue();
+    } catch(e) {
+      // ignore transient queue errors
+    } finally {
+      scheduleNextQueuePoll();
+    }
+  }, delay);
 }
 
 async function pollQueue() {
