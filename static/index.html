@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
   <title>Suno Studio Master v3.5 Ultimate UX Edition (ITU-R BS.1770-4 & AI MV Studio)</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -182,7 +183,7 @@
               <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-[#1b2333] border border-slate-700/60 text-[#3182f6] font-semibold tracking-tight">Suno & YouTube 자동 추출</span>
             </div>
             <div class="flex items-center gap-2">
-              <img id="suno-single-input-thumb" class="hidden w-10 h-10 rounded-xl object-cover border border-white/20 shrink-0 shadow-md transition-all duration-300" alt="Suno Artwork">
+              <img id="suno-single-input-thumb" referrerpolicy="no-referrer" class="hidden w-10 h-10 rounded-xl object-cover border border-white/20 shrink-0 shadow-md transition-all duration-300" alt="Suno Artwork">
               <div class="relative flex-1">
                 <input type="text" id="suno-url-input" 
                   placeholder="Suno 또는 YouTube 링크 붙여넣기 (즉시 자동 시작)" 
@@ -3591,8 +3592,8 @@
     </div>
   </div>
 
-  <script src="/static/app.js?v=20261122_editable_title_v1"></script>
+  <script src="/static/app.js?v=20261122_sync_thumbnails_v2"></script>
   <script src="/static/v3_studio.js?v=20261105_v363"></script>
-  <script src="/static/workspace.js?v=20261122_editable_title_v1"></script>
+  <script src="/static/workspace.js?v=20261122_sync_thumbnails_v2"></script>
 </body>
 </html>

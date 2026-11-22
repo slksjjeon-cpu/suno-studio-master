@@ -7109,6 +7109,7 @@ function updateRowThumbnail(row, val) {
     if (!thumbEl) {
       thumbEl = document.createElement('img');
       thumbEl.className = 'batch-row-thumb w-8 h-8 rounded-md object-cover shrink-0 border border-white/20 shadow-xs transition-transform duration-200 hover:scale-105';
+      thumbEl.setAttribute('referrerpolicy', 'no-referrer');
       const numSpan = row.querySelector('.batch-row-num');
       if (numSpan && numSpan.nextSibling) {
         row.insertBefore(thumbEl, numSpan.nextSibling);
@@ -7147,7 +7148,7 @@ function createBatchRowElement(list, val = '', title = '', imageUrl = '') {
   if (imageUrl) row.dataset.imageUrl = imageUrl;
 
   const { thumb, sunoId } = extractSongThumb(val, imageUrl);
-  const thumbEl = thumb ? `<img src="${thumb}" alt="Thumb" class="batch-row-thumb w-8 h-8 rounded-md object-cover shrink-0 border border-white/20 shadow-xs transition-transform duration-200 hover:scale-105" onerror="if(!this.dataset.triedPng && '${sunoId || ''}'){ this.dataset.triedPng='1'; this.src='https://cdn1.suno.ai/image_${sunoId}.png'; } else if(!this.dataset.triedLarge && '${sunoId || ''}'){ this.dataset.triedLarge='1'; this.src='https://cdn2.suno.ai/image_large_${sunoId}.jpeg'; } else { this.remove(); }">` : '';
+  const thumbEl = thumb ? `<img src="${thumb}" referrerpolicy="no-referrer" alt="Thumb" class="batch-row-thumb w-8 h-8 rounded-md object-cover shrink-0 border border-white/20 shadow-xs transition-transform duration-200 hover:scale-105" onerror="if(!this.dataset.triedPng && '${sunoId || ''}'){ this.dataset.triedPng='1'; this.src='https://cdn1.suno.ai/image_${sunoId}.png'; } else if(!this.dataset.triedLarge && '${sunoId || ''}'){ this.dataset.triedLarge='1'; this.src='https://cdn2.suno.ai/image_large_${sunoId}.jpeg'; } else { this.remove(); }">` : '';
   const titleBadge = title ? `<span class="batch-song-title text-[10px] text-cyan-300 font-bold truncate max-w-[130px] px-1.5 py-0.5 rounded bg-cyan-950/70 border border-cyan-800/60 shrink-0 select-none" title="${title.replace(/"/g, '&quot;')}">${title.replace(/</g, '&lt;')}</span>` : '';
   row.innerHTML = `
     <span class="batch-row-num text-[10px] font-mono font-bold text-amber-400/90 w-5 text-center shrink-0 select-none">${idx}</span>
@@ -7823,7 +7824,7 @@ function renderBatchStatus(batch) {
         <!-- Suno Song Thumbnail (Album Art) -->
         <div class="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-slate-900 border border-white/10 shrink-0 flex items-center justify-center shadow-md group">
           ${thumbUrl ? `
-            <img src="${thumbUrl}" alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" onerror="if(!this.dataset.f1 && '${sunoId || ''}'){ this.dataset.f1='1'; this.src='https://cdn1.suno.ai/image_${sunoId}.png'; } else if(!this.dataset.f2 && '${sunoId || ''}'){ this.dataset.f2='1'; this.src='https://cdn2.suno.ai/image_large_${sunoId}.jpeg'; } else { this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.classList.remove('hidden'); }">
+            <img src="${thumbUrl}" referrerpolicy="no-referrer" alt="Thumbnail" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" onerror="if(!this.dataset.f1 && '${sunoId || ''}'){ this.dataset.f1='1'; this.src='https://cdn1.suno.ai/image_${sunoId}.png'; } else if(!this.dataset.f2 && '${sunoId || ''}'){ this.dataset.f2='1'; this.src='https://cdn2.suno.ai/image_large_${sunoId}.jpeg'; } else { this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.classList.remove('hidden'); }">
             <div class="hidden w-full h-full flex flex-col items-center justify-center bg-slate-800/80 text-slate-400">
               <i class="fa-solid fa-music text-base text-slate-500"></i>
               <span class="text-[8px] font-mono text-slate-500 mt-0.5">Suno</span>

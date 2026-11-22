@@ -3492,9 +3492,9 @@ def start_batch_job(req: BatchStartRequest):
     def _get_batch_thumb(u_raw: str):
         if not u_raw:
             return None
-        sm = re.search(r'song/([0-9a-fA-F-]+)', u_raw)
+        sm = re.search(r'([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})', u_raw)
         if sm:
-            return f"https://cdn2.suno.ai/image_{sm.group(1)}.jpeg"
+            return f"https://cdn2.suno.ai/image_{sm.group(1).lower()}.jpeg"
         ym = re.search(r'(?:youtu\.be/|v=|/embed/|/v/)([a-zA-Z0-9_-]{11})', u_raw)
         if ym:
             return f"https://img.youtube.com/vi/{ym.group(1)}/mqdefault.jpg"
