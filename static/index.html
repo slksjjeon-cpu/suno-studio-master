@@ -1508,8 +1508,17 @@
           </div>
 
           <!-- Action Buttons -->
-          <div class="flex flex-col gap-2.5 pt-1">
-            <input type="text" id="draft-name-input" value="마스터 A (-14 LUFS & 템포 평탄화)" class="w-full bg-[#0e111a] border border-slate-700 focus:border-cyan-400 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none transition font-semibold">
+          <div id="ws-render-action-group" class="flex flex-col gap-2.5 pt-1">
+            <div class="flex flex-col gap-1.5">
+              <label for="draft-name-input" class="text-[11px] font-bold text-slate-300 flex items-center justify-between">
+                <span class="flex items-center gap-1.5">
+                  <i class="fa-solid fa-pen-to-square text-[#3182f6]"></i>
+                  <span>곡 제목 수정 (완성 파일명 반영):</span>
+                </span>
+                <span class="text-[10px] text-slate-400 font-normal">자유롭게 변경 가능</span>
+              </label>
+              <input type="text" id="draft-name-input" placeholder="곡 제목을 입력하세요" class="w-full bg-[#0e111a] border border-slate-700 focus:border-cyan-400 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none transition font-semibold" title="수정된 제목이 완곡 마스터 음원(WAV) 및 완성 영상(MP4) 파일명에 그대로 반영됩니다">
+            </div>
 
             <!-- Real-time Speed Status Badge -->
             <div id="render-speed-reflection-badge" class="px-3 py-2 rounded-lg bg-cyan-950/40 border border-cyan-500/20 text-slate-300 text-[11px] font-mono flex items-center justify-between">
@@ -3582,8 +3591,8 @@
     </div>
   </div>
 
-  <script src="/static/app.js?v=20261122_suno_thumbnails_v4"></script>
+  <script src="/static/app.js?v=20261122_editable_title_v1"></script>
   <script src="/static/v3_studio.js?v=20261105_v363"></script>
-  <script src="/static/workspace.js?v=20261113_hum_individual_batch_v2"></script>
+  <script src="/static/workspace.js?v=20261122_editable_title_v1"></script>
 </body>
 </html>

@@ -65,7 +65,7 @@
       move($("panel-step-2"), $("ws-listen-slot"));
       move($("panel-step-3"), $("ws-adjust-slot"));
       move($("panel-step-4"), $("ws-results-slot"));
-      move($("draft-name-input").parentElement, $("ws-render-slot"));
+      move($("ws-render-action-group") || $("draft-name-input").parentElement, $("ws-render-slot"));
       move($("view-hum-studio"), $("ws-hum-slot"));
       move($("btn-load-demo"), $("ws-demo-slot"));
       // Reuse the export hub and tools once, together on the output page.

@@ -880,6 +880,23 @@ function setupEventListeners() {
   if (dom.btnEnqueueFullMaster) dom.btnEnqueueFullMaster.addEventListener("click", enqueueFullSongMastering);
   if (dom.btnEnqueuePreview) dom.btnEnqueuePreview.addEventListener("click", enqueuePreviewMastering);
 
+  // Live Title Sync from draftNameInput to workspace header & studio
+  if (dom.draftNameInput) {
+    dom.draftNameInput.addEventListener("input", (e) => {
+      dom.draftNameInput.dataset.userEdited = "true";
+      const val = e.target.value.trim();
+      if (val) {
+        const cleanTitle = extractCleanSongTitle(val, val);
+        if (state.audio) state.audio.title = cleanTitle;
+        const bannerTitle = document.getElementById("loaded-track-title");
+        if (bannerTitle) bannerTitle.textContent = cleanTitle;
+        const wsTrackName = document.getElementById("ws-track-name");
+        if (wsTrackName) wsTrackName.textContent = cleanTitle;
+        if (dom.sunoSpeedTrackName) dom.sunoSpeedTrackName.textContent = cleanTitle;
+      }
+    });
+  }
+
   // Click Waveform Seek
   dom.waveformContainer.addEventListener("click", (e) => {
     if (!state.duration) return;
@@ -1493,7 +1510,8 @@ async function exportCurrentTrackAudio(format = "wav") {
   const speed = dom.sunoSpeedSlider ? (parseFloat(dom.sunoSpeedSlider.value) || 1.0) : 1.0;
   const pitch = (state.pitchShift !== undefined) ? state.pitchShift : (dom.sunoPitchSlider ? (parseFloat(dom.sunoPitchSlider.value) || 0.0) : 0.0);
   const keepPitch = dom.toggleKeepPitch ? dom.toggleKeepPitch.checked : true;
-  const title = state.audio.title || "Suno_Master";
+  const inputVal = dom.draftNameInput ? dom.draftNameInput.value.trim() : "";
+  const title = inputVal ? extractCleanSongTitle(inputVal, state.audio.title) : (state.audio.title || "Suno_Master");
   const audioUrl = state.audio.audio_url;
 
   const btn = dom.btnExportSpeedAudio;
@@ -1556,7 +1574,8 @@ async function exportCurrentTrackMp4() {
 
   const speed = dom.sunoSpeedSlider ? (parseFloat(dom.sunoSpeedSlider.value) || 1.0) : 1.0;
   const pitch = (state.pitchShift !== undefined) ? state.pitchShift : (dom.sunoPitchSlider ? (parseFloat(dom.sunoPitchSlider.value) || 0.0) : 0.0);
-  const title = state.audio.title || "Suno_Master";
+  const inputVal = dom.draftNameInput ? dom.draftNameInput.value.trim() : "";
+  const title = inputVal ? extractCleanSongTitle(inputVal, state.audio.title) : (state.audio.title || "Suno_Master");
   const imageUrl = state.audio.image_url || null;
   const audioUrl = state.audio.audio_url;
   const uploadYoutube = document.getElementById('export-opt-youtube')?.checked ?? false;
@@ -2354,7 +2373,10 @@ function applyAudioAnalysis(data) {
   if (dom.sunoSpeedSeekTimeDisplay) dom.sunoSpeedSeekTimeDisplay.textContent = `00:00 / ${data.duration_str || "00:00"}`;
   drawWaveform(data.waveform_peaks || []);
   updateSelectionOverlay();
-  updateDraftNameInput();
+  if (dom.draftNameInput) {
+    dom.draftNameInput.dataset.userEdited = "false";
+  }
+  updateDraftNameInput(true);
   updateSpeedBadge();
   populateSunoV6Prompt(data);
 }
@@ -2475,16 +2497,28 @@ function formatTime(sec) {
 window.applySmartRecommendations = applySmartRecommendations;
 window.resetToDefaults = resetToDefaults;
 
-function updateDraftNameInput() {
-  const letter = state.alphabets[state.draftIndex % state.alphabets.length];
-  const rawTarget = dom.masteringTargetSelect ? parseFloat(dom.masteringTargetSelect.value) : -14.0;
-  const targetLufs = isNaN(rawTarget) ? -14.0 : rawTarget;
-  const trackTitle = state.audio?.title || (state.audio?.filename ? state.audio.filename.replace(/\.[^/.]+$/, "").replace(/^\d+_/, "") : "마스터");
-  const spd = dom.sunoSpeedSlider ? (parseFloat(dom.sunoSpeedSlider.value) || 1.0) : 1.0;
-  const spdTag = Math.abs(spd - 1.0) > 0.01 ? ` • ${spd.toFixed(2)}x` : "";
-  const pitch = dom.sunoPitchSlider ? (parseFloat(dom.sunoPitchSlider.value) || 0.0) : 0.0;
-  const pitchTag = Math.abs(pitch) > 0.005 ? ` • Key ${pitch > 0 ? '+' : ''}${pitch.toFixed(2)}st` : "";
-  dom.draftNameInput.value = `${trackTitle} - 마스터 ${letter} (${targetLufs} LUFS${spdTag}${pitchTag} & 템포 평탄화)`;
+// Clean helper to extract pure song title without draft tags
+function extractCleanSongTitle(inputVal, fallbackTitle = "SunoTrack") {
+  if (!inputVal || !inputVal.trim()) return fallbackTitle;
+  let s = inputVal.trim();
+  s = s.replace(/^\[(?:완곡\s*마스터|마스터)[^\]]*\]\s*/i, "");
+  s = s.replace(/\s*-\s*마스터\s+[A-Z].*$/i, "");
+  s = s.replace(/\s*\(-?\d+(?:\.\d+)?\s*LUFS.*?\)$/i, "");
+  s = s.replace(/\s*\[(?:\d+(?:\.\d+)?x|\+?-?\d+(?:\.\d+)?st)[^\]]*\]/gi, "");
+  s = s.trim();
+  return s || inputVal.trim() || fallbackTitle;
+}
+
+function updateDraftNameInput(force = false) {
+  if (!dom.draftNameInput) return;
+  // If user already manually edited the title, do not overwrite unless forced
+  if (!force && dom.draftNameInput.dataset.userEdited === "true") {
+    return;
+  }
+  const trackTitle = state.audio?.title || (state.audio?.filename ? state.audio.filename.replace(/\.[^/.]+$/, "").replace(/^\d+_/, "") : "");
+  if (trackTitle) {
+    dom.draftNameInput.value = trackTitle;
+  }
 }
 
 function drawWaveform(peaks) {
@@ -2557,7 +2591,15 @@ async function enqueueFullSongMastering() {
     return isNaN(v) ? fallback : v;
   };
 
-  const trackTitle = state.audio?.title || (state.audio?.filename ? state.audio.filename.replace(/\.[^/.]+$/, "").replace(/^\d+_/, "") : "SunoTrack");
+  const inputVal = dom.draftNameInput ? dom.draftNameInput.value.trim() : "";
+  const originalTitle = state.audio?.title || (state.audio?.filename ? state.audio.filename.replace(/\.[^/.]+$/, "").replace(/^\d+_/, "") : "SunoTrack");
+  const trackTitle = extractCleanSongTitle(inputVal, originalTitle);
+
+  // Sync state.audio.title to the user's edited title
+  if (state.audio) {
+    state.audio.title = trackTitle;
+  }
+
   const speedRatio = safeNum(dom.sunoSpeedSlider, 1.0);
   const pitchShift = (state.pitchShift !== undefined) ? state.pitchShift : safeNum(dom.sunoPitchSlider, 0.0);
   const keepPitch = dom.toggleKeepPitch ? dom.toggleKeepPitch.checked : true;
@@ -2644,8 +2686,18 @@ async function enqueuePreviewMastering() {
     return isNaN(v) ? fallback : v;
   };
 
-  const draftName = dom.draftNameInput.value.trim() || `마스터 ${state.alphabets[state.draftIndex]}`;
-  const trackTitle = state.audio?.title || (state.audio?.filename ? state.audio.filename.replace(/\.[^/.]+$/, "").replace(/^\d+_/, "") : "SunoTrack");
+  const inputVal = dom.draftNameInput ? dom.draftNameInput.value.trim() : "";
+  const originalTitle = state.audio?.title || (state.audio?.filename ? state.audio.filename.replace(/\.[^/.]+$/, "").replace(/^\d+_/, "") : "SunoTrack");
+  const trackTitle = extractCleanSongTitle(inputVal, originalTitle);
+
+  // Sync state.audio.title to the user's edited title
+  if (state.audio) {
+    state.audio.title = trackTitle;
+  }
+
+  const letter = state.alphabets[state.draftIndex % state.alphabets.length];
+  const targetLufs = safeNum(dom.masteringTargetSelect, -14.0);
+  const draftName = `${trackTitle} - 마스터 ${letter} (${targetLufs} LUFS)`;
   const pitchShift = (state.pitchShift !== undefined) ? state.pitchShift : safeNum(dom.sunoPitchSlider, 0.0);
 
   const masteringOptions = {

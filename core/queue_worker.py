@@ -72,7 +72,8 @@ class StudioQueueManager:
         source_audio_path: str,
         start_sec: float,
         duration_sec: float,
-        mastering_options: Dict[str, Any]
+        mastering_options: Dict[str, Any],
+        track_title: Optional[str] = None
     ) -> str:
         """Enqueue a mastering / de-watermarking job."""
         job_id = f"job_{uuid.uuid4().hex[:8]}"
@@ -80,6 +81,7 @@ class StudioQueueManager:
         job = {
             "id": job_id,
             "name": name,
+            "track_title": track_title or mastering_options.get("track_title"),
             "type": job_type,
             "status": JobStatus.QUEUED,
             "progress": 0,

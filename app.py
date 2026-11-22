@@ -1204,6 +1204,7 @@ def download_raw_mp4_async_api(req: RawMp4DownloadRequest):
 
 class EnqueueMasteringRequest(BaseModel):
     name: str
+    track_title: Optional[str] = None
     job_type: str = "preview"  # "preview" or "full"
     source_audio_path: str
     start_sec: float = 0.0
@@ -1217,13 +1218,18 @@ def enqueue_mastering_job(req: EnqueueMasteringRequest):
     if not source_path:
         raise HTTPException(status_code=400, detail="원본 오디오 파일을 찾을 수 없거나 허용된 폴더 밖의 경로입니다.")
 
+    norm_opts = _normalize_mastering_options(req.mastering_options)
+    if req.track_title and not norm_opts.get("track_title"):
+        norm_opts["track_title"] = req.track_title.strip()
+
     job_id = queue_manager.add_job(
         name=req.name,
         job_type=req.job_type if req.job_type in ("preview", "full") else "preview",
         source_audio_path=source_path,
         start_sec=_clamp(req.start_sec, 0.0, 86400.0, 0.0),
         duration_sec=_clamp(req.duration_sec, 0.1, 86400.0, 15.0),
-        mastering_options=_normalize_mastering_options(req.mastering_options)
+        mastering_options=norm_opts,
+        track_title=req.track_title.strip() if req.track_title else None
     )
 
     return {
