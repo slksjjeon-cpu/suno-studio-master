@@ -1,0 +1,16 @@
+{
+  "version": "v3.6.0",
+  "app_name": "Suno Studio Master",
+  "build_type": "Ultimate UX Edition",
+  "updated_at": "2026.11.23 00:15",
+  "updated_date": "2026.11.23",
+  "updated_time": "00:15",
+  "timezone": "KST",
+  "changelog": [
+    "곡 제목 실시간 수정 및 완곡 마스터링 렌더링 파일명 연동",
+    "Suno 썸네일 표시 및 No-Referrer CDN 보안 정책 적용",
+    "YouTube 다운로드 안정성 및 봇 차단 대응 강화",
+    "로컬 및 웹(Render) 버전 실시간 동기화",
+    "버전 표기 및 최종 업데이트 날짜·시간 시스템 도입"
+  ]
+}

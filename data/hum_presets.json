@@ -297,7 +297,7 @@
     "saturation": 0,
     "formant": 0
   },
-  "2026_1113_C": {
+  "2026_1122_A": {
     "hum": 0.02,
     "bed": 0.1,
     "leak": 0.02,
@@ -309,6 +309,48 @@
     "wobble": 0.18,
     "reverb": 0.12,
     "saturation": 0.2,
+    "formant": 0
+  },
+  "2026_1122_B": {
+    "hum": 0.16,
+    "bed": 0.1,
+    "leak": 0.02,
+    "bed_lp": 440,
+    "leak_lp": 12000,
+    "pitch": 0,
+    "speed": 1.25,
+    "vocal_cut": 0.99,
+    "wobble": 1,
+    "reverb": 0.59,
+    "saturation": 0.96,
+    "formant": 0
+  },
+  "2026_1122_C": {
+    "hum": 1,
+    "bed": 0.53,
+    "leak": 0.02,
+    "bed_lp": 400,
+    "leak_lp": 500,
+    "pitch": 0,
+    "speed": 1.25,
+    "vocal_cut": 1,
+    "wobble": 1,
+    "reverb": 1,
+    "saturation": 1,
+    "formant": 2.6
+  },
+  "2026_1122_D 꿈꾸던 어른이 되었나요": {
+    "hum": 0,
+    "bed": 0.03,
+    "leak": 0.02,
+    "bed_lp": 870,
+    "leak_lp": 20000,
+    "pitch": -1,
+    "speed": 1,
+    "vocal_cut": 1,
+    "wobble": 0.06,
+    "reverb": 0.02,
+    "saturation": 0,
     "formant": 0
   }
 }

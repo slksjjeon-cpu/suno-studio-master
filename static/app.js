@@ -188,7 +188,75 @@ document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
   setWorkflowStep(1); // Start strictly at Step 1 (Dimmed others)
   startQueuePolling();
+  initStudioVersionInfo();
 });
+
+// =========================================================================
+// STUDIO VERSION & LAST UPDATE DISPLAY SYSTEM
+// =========================================================================
+async function initStudioVersionInfo() {
+  const DEFAULT_VERSION = "v3.6.0";
+  const DEFAULT_UPDATED = "2026.11.23 00:15";
+
+  const applyVersionData = (data) => {
+    const ver = data.version || DEFAULT_VERSION;
+    const updatedAt = data.updated_at || DEFAULT_UPDATED;
+    const dateStr = data.updated_date || updatedAt.split(" ")[0] || "2026.11.23";
+    const timeStr = data.updated_time || (updatedAt.split(" ")[1] || "00:15");
+
+    // 1. Classic Header Tags
+    document.querySelectorAll(".studio-version-tag").forEach(el => {
+      el.textContent = ver;
+    });
+    document.querySelectorAll(".studio-updated-tag").forEach(el => {
+      el.innerHTML = `<i class="fa-regular fa-clock text-cyan-400 text-[10px]"></i> <span class="font-semibold text-slate-300">최종 업데이트: ${updatedAt}</span>`;
+      el.title = `최종 업데이트 일시: ${updatedAt} (${data.timezone || 'KST'})`;
+    });
+
+    // 2. Modern Workspace Shell Tags
+    const brandVer = document.getElementById("ws-brand-ver");
+    if (brandVer) brandVer.textContent = ver;
+
+    const wsVerNum = document.getElementById("ws-ver-num");
+    if (wsVerNum) wsVerNum.textContent = ver;
+
+    const wsVerDate = document.getElementById("ws-ver-date");
+    if (wsVerDate) wsVerDate.textContent = `· ${updatedAt}`;
+
+    const wsSidebarVer = document.getElementById("ws-sidebar-ver");
+    if (wsSidebarVer) wsSidebarVer.textContent = ver;
+
+    const wsSidebarUpdated = document.getElementById("ws-sidebar-updated");
+    if (wsSidebarUpdated) {
+      wsSidebarUpdated.innerHTML = `<i class="fa-regular fa-clock" style="color:#06b6d4; font-size:9.5px;"></i> <span>업데이트: ${updatedAt}</span>`;
+    }
+
+    const wsFooterVer = document.getElementById("ws-footer-ver");
+    if (wsFooterVer) wsFooterVer.textContent = ver;
+
+    const wsFooterUpdated = document.getElementById("ws-footer-updated");
+    if (wsFooterUpdated) {
+      wsFooterUpdated.textContent = `최종 업데이트: ${updatedAt} (${data.timezone || 'KST'}) / 로컬 작업 공간`;
+    }
+
+    // 3. Document Title
+    if (document.title && !document.title.includes(ver)) {
+      document.title = `Suno Studio Master ${ver} (업데이트: ${updatedAt}) - ITU-R BS.1770-4 & AI MV Studio`;
+    }
+  };
+
+  try {
+    const res = await fetch("/api/version", { cache: "no-store" });
+    if (res.ok) {
+      const data = await res.json();
+      applyVersionData(data);
+    } else {
+      applyVersionData({ version: DEFAULT_VERSION, updated_at: DEFAULT_UPDATED });
+    }
+  } catch (e) {
+    applyVersionData({ version: DEFAULT_VERSION, updated_at: DEFAULT_UPDATED });
+  }
+}
 
 // =========================================================================
 // UI THEME SWITCHER (1: Cyber Neon, 2: Amber Gold, 3: Emerald Matrix)
@@ -2578,8 +2646,9 @@ function updateSelectionOverlay() {
 
 // Enqueue Full Song Mastering Job (Whole track rendered with current speed directly baked in)
 async function enqueueFullSongMastering() {
-  if (!state.audio) {
-    alert("먼저 분석할 Suno 음원을 업로드해주세요!");
+  const sourcePath = state.audio?.file_path || state.audio?.audio_url || state.currentTrackData?.file_path || state.originalAudioUrl;
+  if (!state.audio || !sourcePath) {
+    alert("마스터링할 음원이 준비되지 않았습니다.\n먼저 Step 1(01 음원 불러오기)에서 음원 링크를 입력하거나 오디오 파일을 업로드해주세요.");
     return;
   }
 
@@ -2631,7 +2700,7 @@ async function enqueueFullSongMastering() {
     name: draftName,
     track_title: trackTitle,
     job_type: "full",
-    source_audio_path: state.audio.file_path,
+    source_audio_path: sourcePath || state.audio.file_path,
     start_sec: 0.0,
     duration_sec: state.duration || 0.0,
     mastering_options: masteringOptions
@@ -2718,11 +2787,17 @@ async function enqueuePreviewMastering() {
     limiter_ceiling_db: -1.0
   };
 
+  const sourcePath = state.audio?.file_path || state.audio?.audio_url || state.currentTrackData?.file_path || state.originalAudioUrl;
+  if (!state.audio || !sourcePath) {
+    alert("미리듣기할 음원이 준비되지 않았습니다.\n먼저 음원을 업로드하거나 분석을 완료해주세요.");
+    return;
+  }
+
   const payload = {
     name: draftName,
     track_title: trackTitle,
     job_type: "preview",
-    source_audio_path: state.audio.file_path,
+    source_audio_path: sourcePath || state.audio.file_path,
     start_sec: state.selectedSegment.start,
     duration_sec: state.selectedSegment.duration,
     mastering_options: masteringOptions

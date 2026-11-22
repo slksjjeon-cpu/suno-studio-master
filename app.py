@@ -626,10 +626,19 @@ def get_safe_yt_dlp_opts(extra_opts: dict = None) -> dict:
 
 def format_youtube_error(err: Exception) -> str:
     err_str = str(err)
-    if "Sign in to confirm you're not a bot" in err_str or "confirm you're not a bot" in err_str or "bot" in err_str.lower():
+    err_lower = err_str.lower()
+    # Normalize unicode apostrophes (e.g. ’ to ')
+    err_norm = err_str.replace("’", "'").replace("‘", "'")
+    if (
+        "confirm you're not a bot" in err_norm
+        or "confirm you are not a bot" in err_norm
+        or "sign in to confirm" in err_lower
+        or "cookies-from-browser" in err_lower
+        or ("bot" in err_lower and "youtube" in err_lower)
+    ):
         return (
             "유튜브 봇 탐지 차단 오류 (Sign in to confirm you're not a bot)\n\n"
-            "클라우드 호스팅 서버(Render.com 등)의 공용 데이터센터 IP가 유튜브로부터 접근 차단되었습니다.\n\n"
+            "클라우드 웹 서버(Render.com 데이터센터 IP)가 유튜브의 자동 봇 방지 시스템에 의해 일시 차단되었습니다.\n\n"
             "💡 즉시 해결 방법:\n"
             "1. 내 컴퓨터의 로컬 스튜디오(http://127.0.0.1:8000)에서 실행하시면 가정용 인터넷 IP로 100% 정상 다운로드됩니다.\n"
             "2. 또는 유튜브 음원을 MP3/MP4로 직접 다운로드받아 파일 업로드란에 넣어주시면 동일하게 완곡 마스터링하실 수 있습니다."
@@ -827,9 +836,39 @@ def get_index():
     return {"message": "Suno AI Mastering Studio Backend Live"}
 
 
+def get_app_version() -> dict:
+    version_file = Path(BASE_DIR) / "version.json"
+    if version_file.exists():
+        try:
+            with open(version_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"[Version] Warning reading version.json: {e}")
+    return {
+        "version": "v3.6.0",
+        "app_name": "Suno Studio Master",
+        "build_type": "Ultimate UX Edition",
+        "updated_at": "2026.11.23 00:15",
+        "updated_date": "2026.11.23",
+        "updated_time": "00:15",
+        "timezone": "KST"
+    }
+
+
 @app.get("/health")
 def get_health():
-    return {"status": "ok", "service": "Antigravity Music Studio"}
+    ver_info = get_app_version()
+    return {
+        "status": "ok",
+        "service": "Antigravity Music Studio",
+        "version": ver_info.get("version", "v3.6.0"),
+        "updated_at": ver_info.get("updated_at", "2026.11.23 00:15")
+    }
+
+
+@app.get("/api/version")
+def api_get_version():
+    return get_app_version()
 
 
 @app.get("/api/system-status")
@@ -1216,7 +1255,11 @@ class EnqueueMasteringRequest(BaseModel):
 def enqueue_mastering_job(req: EnqueueMasteringRequest):
     source_path = resolve_media_path(req.source_audio_path)
     if not source_path:
-        raise HTTPException(status_code=400, detail="원본 오디오 파일을 찾을 수 없거나 허용된 폴더 밖의 경로입니다.")
+        fallback = latest_studio_track.get("file_path")
+        if fallback and os.path.exists(fallback):
+            source_path = fallback
+        else:
+            raise HTTPException(status_code=400, detail="원본 오디오 파일을 찾을 수 없거나 허용된 폴더 밖의 경로입니다.")
 
     norm_opts = _normalize_mastering_options(req.mastering_options)
     if req.track_title and not norm_opts.get("track_title"):
