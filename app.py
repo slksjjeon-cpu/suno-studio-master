@@ -390,6 +390,41 @@ app.mount("/outputs", StaticFiles(directory=OUTPUTS_DIR), name="outputs")
 app.mount("/samples", StaticFiles(directory=SAMPLES_DIR), name="samples")
 
 analysis_tasks: Dict[str, Dict[str, Any]] = {}
+ANALYSIS_TASKS_FILE = Path(DATA_DIR) / "analysis_tasks_cache.json"
+
+def _save_task_to_disk(task_id: str):
+    try:
+        task = analysis_tasks.get(task_id)
+        if not task:
+            return
+        os.makedirs(DATA_DIR, exist_ok=True)
+        data = {}
+        if ANALYSIS_TASKS_FILE.exists():
+            try:
+                with open(ANALYSIS_TASKS_FILE, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+            except Exception:
+                data = {}
+        data[task_id] = task
+        # Keep latest 30 tasks
+        if len(data) > 30:
+            keys = list(data.keys())[:-30]
+            for k in keys:
+                del data[k]
+        with open(ANALYSIS_TASKS_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False)
+    except Exception as e:
+        pass
+
+def _load_task_from_disk(task_id: str) -> Optional[dict]:
+    if ANALYSIS_TASKS_FILE.exists():
+        try:
+            with open(ANALYSIS_TASKS_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                return data.get(task_id)
+        except Exception:
+            pass
+    return None
 latest_studio_track: Dict[str, Any] = {
     "file_path": None, "filename": None, "title": None, "audio_url": None, "image_url": None
 }
@@ -470,9 +505,8 @@ def _sync_to_hum_studio(filepath: str, title: str = None):
         if not p.exists():
             return
         t = title or p.stem
-        cached, dur = _set_hum_source(p, t)
-        if not cached:
-            threading.Thread(target=_run_hum_analysis, daemon=True).start()
+        # Register track metadata in Hum Studio without launching heavy concurrent Demucs stem separation thread
+        _set_hum_source(p, t)
     except Exception as e:
         print("[HumSync] Warning auto-syncing to Hum Studio:", e)
 
@@ -583,12 +617,14 @@ def _run_suno_import_and_analysis_task(task_id: str, suno_url: str):
         analysis_tasks[task_id]["stage"] = "분석 완료!"
         analysis_tasks[task_id]["remaining_sec"] = 0.0
         analysis_tasks[task_id]["data"] = analysis
+        _save_task_to_disk(task_id)
 
     except Exception as e:
         import traceback
         traceback.print_exc()
         analysis_tasks[task_id]["status"] = "failed"
         analysis_tasks[task_id]["error"] = format_youtube_error(e)
+        _save_task_to_disk(task_id)
 
 
 def get_safe_yt_dlp_opts(extra_opts: dict = None) -> dict:
@@ -759,12 +795,14 @@ def _run_youtube_import_and_analysis_task(task_id: str, youtube_url: str):
         analysis_tasks[task_id]["stage"] = "분석 완료!"
         analysis_tasks[task_id]["remaining_sec"] = 0.0
         analysis_tasks[task_id]["data"] = analysis
+        _save_task_to_disk(task_id)
 
     except Exception as e:
         import traceback
         traceback.print_exc()
         analysis_tasks[task_id]["status"] = "failed"
         analysis_tasks[task_id]["error"] = format_youtube_error(e)
+        _save_task_to_disk(task_id)
 
 
 @app.post("/api/suno-async")
@@ -962,6 +1000,10 @@ def load_sample_track_async():
 @app.get("/api/analysis-status/{task_id}")
 def get_analysis_status(task_id: str):
     task = analysis_tasks.get(task_id)
+    if not task:
+        task = _load_task_from_disk(task_id)
+        if task:
+            analysis_tasks[task_id] = task
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     return task

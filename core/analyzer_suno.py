@@ -226,10 +226,17 @@ def analyze_suno_track(file_path: str, progress_callback=None, metadata: Optiona
     if progress_callback:
         progress_callback(20, f"오디오 신호 로드 중 ({duration:.1f}초)...", 4.0)
 
-    # Load audio at native or 44.1kHz
-    y, sr = librosa.load(file_path, sr=44100, mono=False)
-    if y.ndim == 1:
-        y = np.stack([y, y], axis=0)
+    # Fast & low-memory audio loading via soundfile (prevents Render 512MB RAM OOM)
+    try:
+        data, sr = sf.read(file_path, dtype='float32')
+        if data.ndim == 1:
+            y = np.stack([data, data], axis=0)
+        else:
+            y = data.T  # Shape: (channels, samples)
+    except Exception:
+        y, sr = librosa.load(file_path, sr=None, mono=False)
+        if y.ndim == 1:
+            y = np.stack([y, y], axis=0)
 
     # 1. Inaudible Watermark & High-Frequency Signature
     if progress_callback:

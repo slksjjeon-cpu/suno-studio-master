@@ -1908,10 +1908,20 @@ async function pollAnalysisTask(taskId) {
   dom.analysisEtaText.textContent = "예상 남은 시간: 계산 중...";
 
   return new Promise((resolve, reject) => {
+    let failRetries = 0;
+    const maxRetries = 10;
     const timer = setInterval(async () => {
       try {
         const res = await fetch(`/api/analysis-status/${taskId}`);
-        if (!res.ok) throw new Error("분석 상태 확인 실패");
+        if (!res.ok) {
+          failRetries++;
+          if (failRetries <= maxRetries) {
+            console.warn(`Analysis status retry ${failRetries}/${maxRetries} (${res.status})`);
+            return;
+          }
+          throw new Error("분석 상태 확인 실패 (서버 응답 오류: " + res.status + ")");
+        }
+        failRetries = 0;
         const data = await res.json();
 
         const pct = Math.min(100, Math.max(0, data.progress || 0));

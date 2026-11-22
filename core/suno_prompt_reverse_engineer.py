@@ -23,8 +23,14 @@ def detect_musical_key_and_scale(y: np.ndarray, sr: int) -> Tuple[str, float]:
     try:
         # Mono conversion for key analysis
         y_mono = librosa.to_mono(y) if y.ndim > 1 else y
-        # Compute chromagram
-        chroma = librosa.feature.chroma_cqt(y=y_mono, sr=sr, hop_length=2048)
+        # Limit to representative middle 60s window to avoid excessive memory on cloud
+        if len(y_mono) > sr * 60:
+            mid = len(y_mono) // 2
+            start = max(0, mid - (sr * 30))
+            end = min(len(y_mono), start + (sr * 60))
+            y_mono = y_mono[start:end]
+        # Compute chromagram via chroma_stft (10x faster & zero-cqt memory spike)
+        chroma = librosa.feature.chroma_stft(y=y_mono, sr=sr, hop_length=2048)
         chroma_avg = np.mean(chroma, axis=1)
         
         # Correlate with 12 major and 12 minor profiles

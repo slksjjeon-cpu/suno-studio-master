@@ -1,16 +1,17 @@
 {
-  "version": "v3.6.0",
+  "version": "v3.6.1",
   "app_name": "Suno Studio Master",
   "build_type": "Ultimate UX Edition",
-  "updated_at": "2026.11.23 00:15",
+  "updated_at": "2026.11.23 00:35",
   "updated_date": "2026.11.23",
-  "updated_time": "00:15",
+  "updated_time": "00:35",
   "timezone": "KST",
   "changelog": [
-    "곡 제목 실시간 수정 및 완곡 마스터링 렌더링 파일명 연동",
-    "Suno 썸네일 표시 및 No-Referrer CDN 보안 정책 적용",
-    "YouTube 다운로드 안정성 및 봇 차단 대응 강화",
-    "로컬 및 웹(Render) 버전 실시간 동기화",
-    "버전 표기 및 최종 업데이트 날짜·시간 시스템 도입"
+    "Suno 오디오 로딩 soundfile 초경량화 (클라우드 512MB RAM OOM 방지)",
+    "분석 상태 폴링 회복 탄력성 강화 (네트워크 및 컨테이너 리로드 10회 재시도)",
+    "태스크 상태 디스크 캐시 영속화 (서버 슬립/재시작 후에도 404 방지)",
+    "Suno 다운로드 시 무거운 음원 분리 백그라운드 동시 실행 방지",
+    "곡 제목 실시간 수정 및 완곡 마스터링 연동",
+    "버전 v3.6.1 및 최종 업데이트 일시 표기 시스템"
   ]
 }
