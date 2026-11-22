@@ -3826,15 +3826,22 @@ if __name__ == "__main__":
     else:
         selected_port = 8000
         selected_host = env_host or "127.0.0.1"
+        # Try port 8000 with quick retries if in TIME_WAIT, then fallback to 8001, 8080
         for cand in [8000, 8001, 8080]:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            try:
-                s.bind(("127.0.0.1", cand))
-                s.close()
-                selected_port = cand
+            bound = False
+            for attempt in range(4):
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                try:
+                    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                    s.bind(("127.0.0.1", cand))
+                    s.close()
+                    selected_port = cand
+                    bound = True
+                    break
+                except Exception:
+                    time.sleep(0.4)
+            if bound:
                 break
-            except Exception:
-                pass
 
     if selected_port != 8000 and not env_port:
         print(f"[Antigravity] Note: Port 8000 was unavailable (reserved/blocked by Windows NAT). Using port {selected_port}.")
