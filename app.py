@@ -527,7 +527,7 @@ def _run_analysis_task(task_id: str, filepath: str, audio_url: str):
         import traceback
         traceback.print_exc()
         analysis_tasks[task_id]["status"] = "failed"
-        analysis_tasks[task_id]["error"] = str(e)
+        analysis_tasks[task_id]["error"] = format_youtube_error(e)
 
 
 class SunoImportRequest(BaseModel):
@@ -588,28 +588,71 @@ def _run_suno_import_and_analysis_task(task_id: str, suno_url: str):
         import traceback
         traceback.print_exc()
         analysis_tasks[task_id]["status"] = "failed"
-        analysis_tasks[task_id]["error"] = str(e)
+        analysis_tasks[task_id]["error"] = format_youtube_error(e)
 
+
+def get_safe_yt_dlp_opts(extra_opts: dict = None) -> dict:
+    js_runtimes = {}
+    if os.path.exists(r"C:\Program Files\nodejs\node.exe"):
+        js_runtimes['node'] = {'path': r'C:\Program Files\nodejs\node.exe'}
+
+    opts = {
+        'quiet': True,
+        'noplaylist': True,
+        'no_warnings': True,
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['android', 'ios', 'web_creator', 'mweb', 'tv'],
+                'player_skip': ['webpage', 'configs']
+            }
+        },
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+            'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7'
+        },
+        'js_runtimes': js_runtimes
+    }
+    cookie_file = os.path.join(DATA_DIR, "youtube_cookies.txt")
+    if os.path.exists(cookie_file) and os.path.getsize(cookie_file) > 10:
+        opts['cookiefile'] = cookie_file
+
+    if extra_opts:
+        if 'extractor_args' in extra_opts and 'youtube' in extra_opts['extractor_args']:
+            opts['extractor_args']['youtube'].update(extra_opts['extractor_args']['youtube'])
+        for k, v in extra_opts.items():
+            if k != 'extractor_args':
+                opts[k] = v
+    return opts
+
+def format_youtube_error(err: Exception) -> str:
+    err_str = str(err)
+    if "Sign in to confirm you're not a bot" in err_str or "confirm you're not a bot" in err_str or "bot" in err_str.lower():
+        return (
+            "유튜브 봇 탐지 차단 오류 (Sign in to confirm you're not a bot)\n\n"
+            "클라우드 호스팅 서버(Render.com 등)의 공용 데이터센터 IP가 유튜브로부터 접근 차단되었습니다.\n\n"
+            "💡 즉시 해결 방법:\n"
+            "1. 내 컴퓨터의 로컬 스튜디오(http://127.0.0.1:8000)에서 실행하시면 가정용 인터넷 IP로 100% 정상 다운로드됩니다.\n"
+            "2. 또는 유튜브 음원을 MP3/MP4로 직접 다운로드받아 파일 업로드란에 넣어주시면 동일하게 완곡 마스터링하실 수 있습니다."
+        )
+    if "Private video" in err_str:
+        return "비공개(Private) 동영상입니다. 유튜브 영상 공개 설정을 '일부 공개' 또는 '공개'로 변경 후 시도해주세요."
+    if "Video unavailable" in err_str:
+        return "동영상을 찾을 수 없거나 유튜브에서 삭제된 영상입니다."
+    if "Sign in to confirm your age" in err_str:
+        return "연령 제한(성인 인증 필요) 동영상입니다. 일반 공개 영상 링크를 이용해주세요."
+    return err_str
 
 def _run_youtube_import_and_analysis_task(task_id: str, youtube_url: str):
     try:
         from yt_dlp import YoutubeDL
         ffmpeg_exe = get_ffmpeg_bin()
-        js_runtimes = {}
-        if os.path.exists(r"C:\Program Files\nodejs\node.exe"):
-            js_runtimes['node'] = {'path': r'C:\Program Files\nodejs\node.exe'}
 
         if task_id in analysis_tasks:
             analysis_tasks[task_id]["progress"] = 5
             analysis_tasks[task_id]["stage"] = "YouTube 메타데이터 및 스트림 확인 중..."
             analysis_tasks[task_id]["remaining_sec"] = 8.0
 
-        ydl_opts_info = {
-            'quiet': True,
-            'noplaylist': True,
-            'extract_flat': False,
-            'js_runtimes': js_runtimes
-        }
+        ydl_opts_info = get_safe_yt_dlp_opts({'extract_flat': False})
 
         with YoutubeDL(ydl_opts_info) as ydl:
             info = ydl.extract_info(youtube_url, download=False)
@@ -639,7 +682,7 @@ def _run_youtube_import_and_analysis_task(task_id: str, youtube_url: str):
                 analysis_tasks[task_id]["stage"] = f"'{clean_title}' 고음질 오디오 추출 중..."
 
             outtmpl = os.path.join(UPLOADS_DIR, f"yt_{clean_title}_{video_id}.%(ext)s")
-            ydl_opts_dl = {
+            ydl_opts_dl = get_safe_yt_dlp_opts({
                 'format': 'bestaudio/best',
                 'outtmpl': outtmpl,
                 'postprocessors': [{
@@ -647,13 +690,10 @@ def _run_youtube_import_and_analysis_task(task_id: str, youtube_url: str):
                     'preferredcodec': 'mp3',
                     'preferredquality': '192',
                 }],
-                'noplaylist': True,
-                'quiet': True,
                 'overwrites': True,
                 'windowsfilenames': True,
-                'ffmpeg_location': ffmpeg_exe,
-                'js_runtimes': js_runtimes
-            }
+                'ffmpeg_location': ffmpeg_exe
+            })
             with YoutubeDL(ydl_opts_dl) as ydl:
                 ydl.download([youtube_url])
 
@@ -715,7 +755,7 @@ def _run_youtube_import_and_analysis_task(task_id: str, youtube_url: str):
         import traceback
         traceback.print_exc()
         analysis_tasks[task_id]["status"] = "failed"
-        analysis_tasks[task_id]["error"] = str(e)
+        analysis_tasks[task_id]["error"] = format_youtube_error(e)
 
 
 @app.post("/api/suno-async")
@@ -936,14 +976,7 @@ def _run_raw_mp4_download_task(task_id: str, url: str):
                     analysis_tasks[task_id]["progress"] = 93
                     analysis_tasks[task_id]["stage"] = "MP4 비디오 & 오디오 패키징 중..."
 
-            ydl_info_opts = {
-                'quiet': True,
-                'no_warnings': True,
-                'noplaylist': True,
-                'js_runtimes': js_runtimes,
-                'remote_components': ['ejs:github'],
-                'http_headers': {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-            }
+            ydl_info_opts = get_safe_yt_dlp_opts({'remote_components': ['ejs:github']})
             raw_title = "YouTube_Track"
             video_id = uuid.uuid4().hex[:8]
             try:
@@ -968,21 +1001,16 @@ def _run_raw_mp4_download_task(task_id: str, url: str):
             analysis_tasks[task_id]["progress"] = 25
             analysis_tasks[task_id]["stage"] = f"'{clean_title}' 원본 고화질 MP4 스트림 다운로드 중..."
 
-            ydl_dl_opts = {
+            ydl_dl_opts = get_safe_yt_dlp_opts({
                 'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/bestvideo+bestaudio/best',
                 'outtmpl': str(out_mp4_path.with_suffix('')) + '.%(ext)s',
                 'merge_output_format': 'mp4',
-                'noplaylist': True,
-                'quiet': True,
-                'no_warnings': True,
                 'windowsfilenames': True,
                 'ffmpeg_location': ffmpeg_dir or ffmpeg_exe,
-                'js_runtimes': js_runtimes,
                 'remote_components': ['ejs:github'],
                 'postprocessors': [{'key': 'FFmpegVideoRemuxer', 'preferedformat': 'mp4'}],
-                'progress_hooks': [yt_progress_hook],
-                'http_headers': {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-            }
+                'progress_hooks': [yt_progress_hook]
+            })
             try:
                 with YoutubeDL(ydl_dl_opts) as ydl:
                     info = ydl.extract_info(url, download=True)
@@ -1118,8 +1146,8 @@ def _run_raw_mp4_download_task(task_id: str, url: str):
         import traceback
         traceback.print_exc()
         analysis_tasks[task_id]["status"] = "failed"
-        analysis_tasks[task_id]["error"] = str(e)
-        analysis_tasks[task_id]["stage"] = f"다운로드 실패: {e}"
+        analysis_tasks[task_id]["error"] = format_youtube_error(e)
+        analysis_tasks[task_id]["stage"] = f"다운로드 실패: {format_youtube_error(e)}"
 
 
 @app.get("/api/download/raw-mp4-file/{filename}")
@@ -1898,7 +1926,7 @@ def _run_hum_batch_zip_task(task_id: str, base_title: str, items: list):
         import traceback
         traceback.print_exc()
         analysis_tasks[task_id]["status"] = "failed"
-        analysis_tasks[task_id]["error"] = str(e)
+        analysis_tasks[task_id]["error"] = format_youtube_error(e)
         analysis_tasks[task_id]["stage"] = f"일괄 렌더링 오류: {e}"
 
 
@@ -3015,7 +3043,7 @@ def _process_batch_job(batch_id: str):
                     item["message"] = "유튜브 영상 정보 분석 중..."
                     item["progress"] = 25
 
-                ydl_info_opts = {"quiet": True, "no_warnings": True, "skip_download": True}
+                ydl_info_opts = get_safe_yt_dlp_opts({"skip_download": True})
                 with YoutubeDL(ydl_info_opts) as ydl:
                     info = ydl.extract_info(url, download=False)
                     raw_title = info.get("title", "YouTube_Track")
@@ -3034,14 +3062,12 @@ def _process_batch_job(batch_id: str):
                         item["message"] = "고화질 MP4 다운로드 중..."
                         item["progress"] = 40
 
-                    ydl_mp4_opts = {
+                    ydl_mp4_opts = get_safe_yt_dlp_opts({
                         "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
                         "outtmpl": str(batch_out_dir / f"{clean_title}.%(ext)s"),
                         "merge_output_format": "mp4",
-                        "quiet": True,
-                        "no_warnings": True,
                         "postprocessors": [{"key": "FFmpegVideoRemuxer", "preferedformat": "mp4"}]
-                    }
+                    })
                     try:
                         with YoutubeDL(ydl_mp4_opts) as ydl:
                             ydl.download([url])
@@ -3078,17 +3104,15 @@ def _process_batch_job(batch_id: str):
                         subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                         mp3_path = target_mp3
                     else:
-                        ydl_audio_opts = {
+                        ydl_audio_opts = get_safe_yt_dlp_opts({
                             "format": "bestaudio/best",
                             "outtmpl": str(batch_out_dir / f"{clean_title}.%(ext)s"),
-                            "quiet": True,
-                            "no_warnings": True,
                             "postprocessors": [{
                                 "key": "FFmpegExtractAudio",
                                 "preferredcodec": "mp3",
                                 "preferredquality": "320"
                             }]
-                        }
+                        })
                         with YoutubeDL(ydl_audio_opts) as ydl:
                             ydl.download([url])
                         for cand in batch_out_dir.glob(f"{clean_title}*.mp3"):
@@ -3305,8 +3329,8 @@ def _process_batch_job(batch_id: str):
             with batch_lock:
                 item["status"] = "error"
                 item["progress"] = 0
-                item["error"] = str(exc)
-                item["message"] = f"실패: {exc}"
+                item["error"] = format_youtube_error(exc)
+                item["message"] = f"실패: {format_youtube_error(exc)}"
                 task["failed"] += 1
 
     # Clean up batch directory ONLY if all YouTube uploads succeeded and no local exports were kept
