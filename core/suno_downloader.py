@@ -434,6 +434,27 @@ def resolve_suno_playlist(url_or_id: str) -> dict:
     }
 
 
+def _resilient_fetch_bytes(url: str, headers: dict = None, timeout: int = 25) -> bytes:
+    h = headers or DEFAULT_HEADERS
+    try:
+        req = urllib.request.Request(url, headers=h)
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return resp.read()
+    except Exception as e:
+        # Resilient curl fallback (handles Cloudflare TLS ciphers & datacenter IP routing better)
+        try:
+            cmd = ["curl", "-sL", "--max-time", str(timeout + 5)]
+            for k, v in h.items():
+                cmd.extend(["-H", f"{k}: {v}"])
+            cmd.append(url)
+            res = subprocess.run(cmd, capture_output=True, timeout=timeout + 10)
+            if res.returncode == 0 and len(res.stdout) > 500:
+                return res.stdout
+        except Exception:
+            pass
+        raise e
+
+
 def decrypt_suno_audio(song_id: str, encrypted_bytes: bytes) -> bytes:
     """
     Decrypts Suno Eden / Mango encrypted progressive stream.
@@ -457,9 +478,30 @@ def decrypt_suno_audio(song_id: str, encrypted_bytes: bytes) -> bytes:
         "Referer": f"https://suno.com/song/{song_id}"
     }
     
-    req = urllib.request.Request(rights_url, data=payload, headers=headers)
-    with urllib.request.urlopen(req, timeout=15) as resp:
-        rights = json.loads(resp.read().decode("utf-8"))
+    rights = None
+    try:
+        req = urllib.request.Request(rights_url, data=payload, headers=headers)
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            rights = json.loads(resp.read().decode("utf-8"))
+    except Exception as e:
+        # Fallback to curl POST
+        try:
+            cmd = [
+                "curl", "-sL", "--max-time", "18",
+                "-X", "POST",
+                "-H", "Content-Type: application/json",
+                "-H", "Origin: https://suno.com",
+                "-H", f"Referer: https://suno.com/song/{song_id}",
+                "-d", json.dumps({"content_params": {"content_id": song_id, "content_type": "clip"}}),
+                rights_url
+            ]
+            res = subprocess.run(cmd, capture_output=True, timeout=20)
+            if res.returncode == 0 and len(res.stdout) > 20:
+                rights = json.loads(res.stdout.decode("utf-8"))
+            else:
+                raise e
+        except Exception:
+            raise e
 
     glt = rights["glt"]
     glt_key = hashlib.sha256(glt.encode("utf-8")).digest()
@@ -567,15 +609,20 @@ def download_suno_song(url_or_id: str, progress_cb=None) -> dict:
                 pass
 
     converted = False
+    attempt1_err = None
 
     # Attempt 1: Try progressive stream (decrypt if Eden encrypted)
     try:
         if progress_cb:
             progress_cb(35, "Suno 오디오 데이터 다운로드 중...")
 
-        req_audio = urllib.request.Request(audio_url, headers=DEFAULT_HEADERS)
-        with urllib.request.urlopen(req_audio, timeout=25) as resp:
-            raw_audio = resp.read()
+        audio_headers = {
+            **DEFAULT_HEADERS,
+            "Origin": "https://suno.com",
+            "Referer": f"https://suno.com/song/{song_id}",
+            "Accept": "*/*"
+        }
+        raw_audio = _resilient_fetch_bytes(audio_url, headers=audio_headers, timeout=25)
 
         is_mp4 = len(raw_audio) > 8 and raw_audio[4:8] == b"ftyp"
         is_mp3 = len(raw_audio) > 3 and (raw_audio[:3] == b"ID3" or raw_audio[:2] == b"\xff\xfb")
@@ -613,15 +660,17 @@ def download_suno_song(url_or_id: str, progress_cb=None) -> dict:
                 except Exception:
                     pass
         else:
+            attempt1_err = "스트림 복호화 후 유효한 오디오 컨테이너가 아님"
             print("[SunoDownloader] Stream is not a valid container, switching to official CDN MP4 fallback...")
     except Exception as ex:
+        attempt1_err = str(ex)
         print(f"[SunoDownloader] Progressive stream extraction failed ({ex}), switching to fallback...")
 
     # Attempt 2: Fallback to official CDN MP4 if progressive stream failed
     if not converted:
         fallback_ok = _convert_via_official_mp4()
         if not fallback_ok or not final_path.exists() or final_path.stat().st_size < 1000:
-            raise RuntimeError(f"Suno 음원 다운로드 및 변환 실패: 오디오 스트림을 추출할 수 없습니다. (ID: {song_id})")
+            raise RuntimeError(f"Suno 음원 다운로드 및 변환 실패: 오디오 스트림을 추출할 수 없습니다. (ID: {song_id}, 상세: {attempt1_err or '실패'})")
 
     if progress_cb:
         progress_cb(80, "Suno 음원 준비 완료! 정밀 음향 분석 시작...")
