@@ -601,6 +601,7 @@ def _run_suno_import_and_analysis_task(task_id: str, suno_url: str):
                 analysis_tasks[task_id]["progress"] = max(5, overall_pct)
                 analysis_tasks[task_id]["stage"] = stage_msg
                 analysis_tasks[task_id]["remaining_sec"] = max(1.0, round(12.0 * (1.0 - overall_pct / 100.0), 1))
+                _save_task_to_disk(task_id)
 
         # 1. Download & Decrypt Suno Audio
         dl_res = download_suno_song(suno_url, progress_cb=on_download_progress)
@@ -611,6 +612,7 @@ def _run_suno_import_and_analysis_task(task_id: str, suno_url: str):
         if task_id in analysis_tasks:
             analysis_tasks[task_id]["progress"] = 40
             analysis_tasks[task_id]["stage"] = f"'{suno_title}' 오디오 분석 엔진 시작..."
+            _save_task_to_disk(task_id)
 
         # 2. Run analysis
         def on_analysis_progress(percent: int, stage_msg: str, remaining_sec: float):
@@ -619,7 +621,6 @@ def _run_suno_import_and_analysis_task(task_id: str, suno_url: str):
                 analysis_tasks[task_id]["progress"] = overall_pct
                 analysis_tasks[task_id]["stage"] = stage_msg
                 analysis_tasks[task_id]["remaining_sec"] = remaining_sec
-                _save_task_to_disk(task_id)
                 _save_task_to_disk(task_id)
 
         analysis = analyze_suno_track(filepath, progress_callback=on_analysis_progress, metadata={"title": suno_title, "song_id": dl_res.get("song_id")})

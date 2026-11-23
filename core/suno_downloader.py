@@ -574,12 +574,13 @@ def download_suno_song(url_or_id: str, progress_cb=None) -> dict:
         # First attempt: stream directly via FFmpeg
         try:
             res = subprocess.run([
-                ffmpeg, "-y", "-v", "error",
+                ffmpeg, "-y", "-nostdin", "-v", "error",
                 "-i", cdn_fallback_url,
                 "-vn", "-c:a", "libmp3lame",
                 "-b:a", "320k",
+                "-threads", "0",
                 str(final_path)
-            ], timeout=60)
+            ], stdin=subprocess.DEVNULL, capture_output=True, timeout=120)
             if res.returncode == 0 and final_path.exists() and final_path.stat().st_size > 1000:
                 return True
         except Exception as ex:
@@ -592,12 +593,13 @@ def download_suno_song(url_or_id: str, progress_cb=None) -> dict:
             with urllib.request.urlopen(req, timeout=30) as resp, open(tmp_mp4.name, "wb") as f_out:
                 shutil.copyfileobj(resp, f_out)
             res = subprocess.run([
-                ffmpeg, "-y", "-v", "error",
+                ffmpeg, "-y", "-nostdin", "-v", "error",
                 "-i", tmp_mp4.name,
                 "-vn", "-c:a", "libmp3lame",
                 "-b:a", "320k",
+                "-threads", "0",
                 str(final_path)
-            ], timeout=60)
+            ], stdin=subprocess.DEVNULL, capture_output=True, timeout=120)
             return res.returncode == 0 and final_path.exists() and final_path.stat().st_size > 1000
         except Exception as ex2:
             print(f"[SunoDownloader] Downloaded MP4 conversion failed: {ex2}")
@@ -639,26 +641,36 @@ def download_suno_song(url_or_id: str, progress_cb=None) -> dict:
         )
 
         if is_valid_stream:
-            if progress_cb:
-                progress_cb(65, "고음질 320kbps MP3 변환 및 정규화 중...")
-            tmp_in = tempfile.NamedTemporaryFile(suffix=".m4a", delete=False)
-            try:
-                tmp_in.write(decrypted_bytes)
-                tmp_in.close()
-                res = subprocess.run([
-                    ffmpeg, "-y", "-v", "error",
-                    "-i", tmp_in.name,
-                    "-c:a", "libmp3lame",
-                    "-b:a", "320k",
-                    str(final_path)
-                ], timeout=45)
-                if res.returncode == 0 and final_path.exists() and final_path.stat().st_size > 1000:
-                    converted = True
-            finally:
+            # If stream is already valid MP3, save directly
+            if len(decrypted_bytes) > 3 and (decrypted_bytes[:3] == b"ID3" or decrypted_bytes[:2] == b"\xff\xfb"):
+                final_path.write_bytes(decrypted_bytes)
+                converted = True
+            else:
+                if progress_cb:
+                    progress_cb(65, "고음질 320kbps MP3 변환 및 정규화 중...")
+                tmp_in = tempfile.NamedTemporaryFile(suffix=".m4a", delete=False)
                 try:
-                    os.unlink(tmp_in.name)
-                except Exception:
-                    pass
+                    tmp_in.write(decrypted_bytes)
+                    tmp_in.close()
+                    res = subprocess.run([
+                        ffmpeg, "-y", "-nostdin", "-v", "error",
+                        "-i", tmp_in.name,
+                        "-vn", "-c:a", "libmp3lame",
+                        "-b:a", "320k",
+                        "-threads", "0",
+                        str(final_path)
+                    ], stdin=subprocess.DEVNULL, capture_output=True, timeout=120)
+                    if res.returncode == 0 and final_path.exists() and final_path.stat().st_size > 1000:
+                        converted = True
+                    else:
+                        err_msg = res.stderr.decode(errors='ignore') if res.stderr else f"Exit code {res.returncode}"
+                        attempt1_err = f"FFmpeg 변환 실패: {err_msg}"
+                        print(f"[SunoDownloader] FFmpeg conversion failed: {err_msg}")
+                finally:
+                    try:
+                        os.unlink(tmp_in.name)
+                    except Exception:
+                        pass
         else:
             attempt1_err = "스트림 복호화 후 유효한 오디오 컨테이너가 아님"
             print("[SunoDownloader] Stream is not a valid container, switching to official CDN MP4 fallback...")

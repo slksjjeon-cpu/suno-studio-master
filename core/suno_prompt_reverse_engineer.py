@@ -6,6 +6,7 @@ precise Suno v6 Style Prompts (<1,000 chars), Exclude Styles, and Advanced Param
 
 import os
 import re
+import gc
 import time
 import numpy as np
 import librosa
@@ -23,15 +24,20 @@ def detect_musical_key_and_scale(y: np.ndarray, sr: int) -> Tuple[str, float]:
     try:
         # Mono conversion for key analysis
         y_mono = librosa.to_mono(y) if y.ndim > 1 else y
-        # Limit to representative middle 60s window to avoid excessive memory on cloud
-        if len(y_mono) > sr * 60:
-            mid = len(y_mono) // 2
-            start = max(0, mid - (sr * 30))
-            end = min(len(y_mono), start + (sr * 60))
-            y_mono = y_mono[start:end]
+        # Limit to representative 20s slice and downsample to 11kHz for minimal memory footprint (<10MB)
+        slice_len = min(len(y_mono), int(sr * 20))
+        mid = len(y_mono) // 2
+        start = max(0, mid - int(sr * 10))
+        end = min(len(y_mono), start + slice_len)
+        step = max(1, sr // 11025)
+        y_slice = y_mono[start:end:step]
+        sr_sub = sr // step
+
         # Compute chromagram via chroma_stft (10x faster & zero-cqt memory spike)
-        chroma = librosa.feature.chroma_stft(y=y_mono, sr=sr, hop_length=2048)
+        chroma = librosa.feature.chroma_stft(y=y_slice, sr=sr_sub, hop_length=1024)
         chroma_avg = np.mean(chroma, axis=1)
+        del chroma, y_slice
+        gc.collect()
         
         # Correlate with 12 major and 12 minor profiles
         best_score = -1.0
@@ -73,9 +79,9 @@ def analyze_vocal_and_instrumental_spectrum(y: np.ndarray, sr: int) -> Dict[str,
             
         y_mono = librosa.to_mono(y)
         
-        # Evaluate on representative 30s sample to prevent multi-hundred MB STFT allocations on cloud
-        sample_len = min(len(y_mono), int(sr * 30))
-        start_samp = int(sr * 15) if len(y_mono) > int(sr * 45) else 0
+        # Evaluate on representative 15s sample to prevent multi-hundred MB STFT allocations on cloud
+        sample_len = min(len(y_mono), int(sr * 15))
+        start_samp = int(sr * 15) if len(y_mono) > int(sr * 35) else 0
         y_sample = y_mono[start_samp:start_samp + sample_len]
 
         # Spectrogram on sample chunk
@@ -100,21 +106,29 @@ def analyze_vocal_and_instrumental_spectrum(y: np.ndarray, sr: int) -> Dict[str,
         mid_rms = np.sqrt(np.mean(mid**2)) + 1e-9
         side_rms = np.sqrt(np.mean(side**2)) + 1e-9
         stereo_ratio = side_rms / mid_rms
+        del mid, side, S
+        gc.collect()
         
-        # Estimate spectral contrast (peaks vs valleys - indicates harmonic richness)
-        contrast = librosa.feature.spectral_contrast(y=y_sample, sr=sr)
+        # Estimate spectral contrast on small chunk
+        contrast = librosa.feature.spectral_contrast(y=y_sample[:min(len(y_sample), sr * 5)], sr=sr)
         mean_contrast = float(np.mean(contrast))
+        del contrast
         
-        # Estimate F0 pitch range in vocal band to guess vocal pitch profile
-        y_vocal_sample = y_sample
+        # Lightweight F0 pitch estimation using YIN on 4s slice (avoids massive pyin memory spikes)
+        median_f0 = 0.0
+        try:
+            f0_slice = y_sample[:min(len(y_sample), sr * 4):2]
+            f0 = librosa.yin(
+                f0_slice, fmin=75, fmax=450, sr=sr//2,
+                frame_length=1024, hop_length=512
+            )
+            valid_f0 = f0[(f0 >= 75) & (f0 <= 450)]
+            if len(valid_f0) > 5:
+                median_f0 = float(np.median(valid_f0))
+            del f0_slice, f0, valid_f0
+        except Exception:
+            median_f0 = 0.0
 
-        f0, voiced_flag, _ = librosa.pyin(
-            y_vocal_sample[::2], fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7'), sr=sr//2,
-            frame_length=2048, hop_length=512
-        )
-        voiced_f0 = f0[voiced_flag & ~np.isnan(f0)] if voiced_flag is not None else np.array([])
-        
-        median_f0 = float(np.median(voiced_f0)) if len(voiced_f0) > 10 else 0.0
         vocal_range_desc = "Neutral / Balanced"
         vocal_gender_est = "Solo Vocal"
         
@@ -164,8 +178,13 @@ def analyze_song_dynamic_structure(y: np.ndarray, sr: int) -> Dict[str, Any]:
     """Analyzes volume envelope and energy jumps to detect drops, build-ups, and pacing."""
     try:
         y_mono = librosa.to_mono(y) if y.ndim > 1 else y
-        hop = int(sr * 0.5) # 0.5s chunks
-        rms = librosa.feature.rms(y=y_mono, frame_length=hop*2, hop_length=hop)[0]
+        # Subsample to 11kHz to keep memory under 5MB
+        step = max(1, sr // 11025)
+        y_sub = y_mono[::step]
+        sr_sub = sr // step
+        hop = int(sr_sub * 0.5) # 0.5s chunks
+        rms = librosa.feature.rms(y=y_sub, frame_length=hop*2, hop_length=hop)[0]
+        del y_sub
         
         # Smooth RMS
         rms_norm = (rms - np.min(rms)) / (np.max(rms) - np.min(rms) + 1e-9)
@@ -223,7 +242,7 @@ def extract_song_lyrics(audio_path: str, raw_info: Dict[str, Any], title: str) -
     1. Check YouTube description & raw metadata
     2. Check nearby downloaded subtitles (.vtt / .srt)
     3. Suno API prompt/lyrics field
-    4. Quick 15s Whisper slice with 4-second hard timeout
+    4. Quick 15s Whisper slice with 4-second hard timeout (Local only, skipped on cloud to avoid OOM)
     5. Instant high-quality genre-matching fallback
     """
     lyrics_found = ""
@@ -273,8 +292,8 @@ def extract_song_lyrics(audio_path: str, raw_info: Dict[str, Any], title: str) -
         if len(lines) >= 4:
             return "\n".join(lines)
 
-    # 4. Ultra-Fast Whisper AI Transcription with strict 4.0-second Hard Timeout
-    if not lyrics_found and audio_path and os.path.exists(audio_path):
+    # 4. Ultra-Fast Whisper AI Transcription with strict 4.0-second Hard Timeout (Skipped on 512MB cloud container)
+    if not lyrics_found and audio_path and os.path.exists(audio_path) and not os.environ.get("RENDER"):
         try:
             with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
                 future = executor.submit(_quick_whisper_worker, audio_path)

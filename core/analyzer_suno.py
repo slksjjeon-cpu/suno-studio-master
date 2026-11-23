@@ -101,9 +101,13 @@ def compute_smart_mastering_recommendations(y: np.ndarray, sr: int, watermark_in
     rec_width = 1.15
     width_reason = "자연스러운 입체 음장 확장 (115%)"
     if is_stereo:
-        mid = 0.5 * (y[0] + y[1])
-        side = 0.5 * (y[0] - y[1])
+        # Use 10s representative slice to avoid 400MB memory spike on 12M audio samples
+        y_slice_stereo = y[:, :int(sr * 10)] if y.shape[1] > sr * 10 else y
+        mid = 0.5 * (y_slice_stereo[0] + y_slice_stereo[1])
+        side = 0.5 * (y_slice_stereo[0] - y_slice_stereo[1])
         side_ratio = float(np.sum(side**2) / (np.sum(mid**2) + 1e-12))
+        del mid, side
+        gc.collect()
         if side_ratio < 0.12:
             rec_width = 1.30
             width_reason = "모노에 가까운 좁은 공간감 확장 (130% 추천)"
@@ -273,6 +277,7 @@ def analyze_suno_track(file_path: str, progress_callback=None, metadata: Optiona
     if progress_callback:
         progress_callback(85, "AI 음향 밸런스 프로파일링 및 마스터링 최적 추천값 산출 중...", 0.5)
     smart_rec = compute_smart_mastering_recommendations(y, sr, watermark_info, tempo_info, lufs)
+    gc.collect()
 
     # 6. Deep Suno v6 Reverse Prompt Engineering
     if progress_callback:
@@ -280,8 +285,11 @@ def analyze_suno_track(file_path: str, progress_callback=None, metadata: Optiona
     
     # Key detection & acoustic profile
     key_name, key_conf = detect_musical_key_and_scale(y, sr)
+    gc.collect()
     acoustic_profile = analyze_vocal_and_instrumental_spectrum(y, sr)
+    gc.collect()
     structure_profile = analyze_song_dynamic_structure(y, sr)
+    gc.collect()
     
     song_title = (metadata or {}).get("title") or os.path.splitext(os.path.basename(file_path))[0]
     # Clean up yt_ prefixes or timestamps and normalize Unicode font variants (e.g. mathematical bold) to standard text
