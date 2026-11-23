@@ -20,12 +20,10 @@ def analyze_dynamic_tempo_robust(y: np.ndarray, sr: int) -> Dict[str, Any]:
             "drift_percent": 0.0, "is_accelerating": False, "timeline_points": []
         }
 
-    # Low-memory downsampling for tempo analysis (22kHz-24kHz standard for beat detection)
-    if sr > 24000:
-        y_mono = y_mono[::2]
-        sr_tempo = sr // 2
-    else:
-        sr_tempo = sr
+    # Ultra low-memory downsampling for tempo analysis (11kHz-12kHz standard for beat detection)
+    downsample_factor = max(1, sr // 11025)
+    y_mono = y_mono[::downsample_factor]
+    sr_tempo = sr // downsample_factor
 
     # 1. Onset Strength Envelope
     hop_length = 512
@@ -44,8 +42,8 @@ def analyze_dynamic_tempo_robust(y: np.ndarray, sr: int) -> Dict[str, Any]:
         base_tempo *= 2.0
     base_tempo = round(base_tempo, 1)
 
-    # 3. Dynamic Fourier Tempogram
-    tempogram = librosa.feature.tempogram(onset_envelope=onset_env, sr=sr_tempo, hop_length=hop_length, win_length=384)
+    # 3. Dynamic Fourier Tempogram (win_length=192 tuned for 11k-12kHz)
+    tempogram = librosa.feature.tempogram(onset_envelope=onset_env, sr=sr_tempo, hop_length=hop_length, win_length=192)
     tempo_bins = librosa.tempo_frequencies(tempogram.shape[0], sr=sr_tempo, hop_length=hop_length)
 
     # Focus only on the octave window [base_tempo * 0.75, base_tempo * 1.35]

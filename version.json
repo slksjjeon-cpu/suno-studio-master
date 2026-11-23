@@ -1,16 +1,17 @@
 {
-  "version": "v3.6.4",
+  "version": "v3.6.5",
   "app_name": "Suno Studio Master",
-  "build_type": "Ultimate Cloud Stability Edition",
-  "updated_at": "2026.11.23 19:55",
+  "build_type": "Cloud Ultra-Low Memory & Resilient Stream Edition",
+  "updated_at": "2026.11.23 20:08",
   "updated_date": "2026.11.23",
-  "updated_time": "19:55",
+  "updated_time": "20:08",
   "timezone": "KST",
   "changelog": [
-    "클라우드 512MB RAM 초과(OOM 1.1GB 크래시) 완벽 차단 (STFT/워터마크/LUFS 메모리 75% 절감, 피크 307MB 달성)",
+    "템포 분석 11kHz 초저메모리 서브샘플링 & win_length 최적화 (69% OOM 완전 해결)",
+    "Suno 스트림 다운로드 Origin/Referer 보강 및 다중 헤더 복구 지원",
+    "LUFS BS.1770-4 및 워터마크 STFT 20s 윈도우링 메모리 75% 절감",
     "완곡 마스터링 대기열 등록 시 경로 자동 복구 안전망 구축 (400 에러 원천 차단)",
-    "분석 진행률 실시간 디스크 동기화 및 서버 재시작 시 404 Not Found 방어",
-    "웹 클라우드 429 Rate Limit 백오프 및 대기열 가변 폴링 최적화",
-    "버전 v3.6.4 및 최종 업데이트 일시 표기 동기화"
+    "분석 진행률 실시간 디스크 동기화 및 404 Not Found 방어",
+    "버전 v3.6.5 및 최종 업데이트 일시 표기 동기화"
   ]
 }

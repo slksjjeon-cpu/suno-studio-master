@@ -1,4 +1,5 @@
 import os
+import gc
 import re
 import time
 import unicodedata
@@ -245,16 +246,19 @@ def analyze_suno_track(file_path: str, progress_callback=None, metadata: Optiona
     if progress_callback:
         progress_callback(35, "18kHz+ 초고역대 비가청 워터마크 및 AI 지문 탐지 중...", 3.0)
     watermark_info = detect_watermark_signature(y, sr)
+    gc.collect()
 
     # 2. Dynamic Tempo & Acceleration Drift Analysis (Octave-Locked Robust Engine)
     if progress_callback:
         progress_callback(50, "비트 트래킹 및 옥타브 락킹 기반 템포 가속 곡선 계산 중...", 2.0)
     tempo_info = analyze_dynamic_tempo_robust(y, sr)
+    gc.collect()
 
     # 3. Loudness Analysis (LUFS)
     if progress_callback:
         progress_callback(65, "통합 라우드니스(LUFS) 및 다이내믹 레인지 정밀 측정 중...", 1.2)
     lufs = calculate_integrated_lufs(y, sr)
+    gc.collect()
     peak = float(np.max(np.abs(y)))
     peak_db = round(20.0 * np.log10(max(1e-6, peak)), 2)
 
