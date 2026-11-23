@@ -73,8 +73,13 @@ def analyze_vocal_and_instrumental_spectrum(y: np.ndarray, sr: int) -> Dict[str,
             
         y_mono = librosa.to_mono(y)
         
-        # Spectrogram
-        S = np.abs(librosa.stft(y_mono, n_fft=2048, hop_length=1024))
+        # Evaluate on representative 30s sample to prevent multi-hundred MB STFT allocations on cloud
+        sample_len = min(len(y_mono), int(sr * 30))
+        start_samp = int(sr * 15) if len(y_mono) > int(sr * 45) else 0
+        y_sample = y_mono[start_samp:start_samp + sample_len]
+
+        # Spectrogram on sample chunk
+        S = np.abs(librosa.stft(y_sample, n_fft=2048, hop_length=1024))
         freqs = librosa.fft_frequencies(sr=sr, n_fft=2048)
         
         # Frequency band masks
@@ -89,22 +94,19 @@ def analyze_vocal_and_instrumental_spectrum(y: np.ndarray, sr: int) -> Dict[str,
         presence_energy = np.sum(S[presence_mask, :]) / total_energy
         air_energy = np.sum(S[air_mask, :]) / total_energy
         
-        # Stereo Width (difference between L and R)
-        mid = (y[0] + y[1]) / 2.0
-        side = (y[0] - y[1]) / 2.0
+        # Stereo Width (difference between L and R on sample)
+        mid = (y[0, start_samp:start_samp + sample_len] + y[1, start_samp:start_samp + sample_len]) / 2.0
+        side = (y[0, start_samp:start_samp + sample_len] - y[1, start_samp:start_samp + sample_len]) / 2.0
         mid_rms = np.sqrt(np.mean(mid**2)) + 1e-9
         side_rms = np.sqrt(np.mean(side**2)) + 1e-9
         stereo_ratio = side_rms / mid_rms
         
         # Estimate spectral contrast (peaks vs valleys - indicates harmonic richness)
-        contrast = librosa.feature.spectral_contrast(y=y_mono, sr=sr)
+        contrast = librosa.feature.spectral_contrast(y=y_sample, sr=sr)
         mean_contrast = float(np.mean(contrast))
         
-        # Estimate F0 pitch range in vocal band to guess vocal pitch profile (optimized 30s sample chunk)
-        sample_len = min(len(y_mono), int(sr * 30))
-        # Take representative middle segment (e.g. 15s to 45s) where vocals are prominent
-        start_samp = int(sr * 15) if len(y_mono) > int(sr * 45) else 0
-        y_vocal_sample = y_mono[start_samp:start_samp + sample_len]
+        # Estimate F0 pitch range in vocal band to guess vocal pitch profile
+        y_vocal_sample = y_sample
 
         f0, voiced_flag, _ = librosa.pyin(
             y_vocal_sample[::2], fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7'), sr=sr//2,

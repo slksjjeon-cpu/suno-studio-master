@@ -19,11 +19,21 @@ def detect_watermark_signature(y: np.ndarray, sr: int) -> Dict[str, Any]:
             "filters": {}
         }
 
-    y_mono = np.mean(y, axis=0) if y.ndim > 1 else y
-    is_stereo = y.ndim > 1 and y.shape[0] == 2
+    # Use a representative 20-second window to prevent multi-gigabyte STFT memory allocation on cloud
+    total_len = y.shape[-1] if y.ndim > 1 else len(y)
+    max_samples = int(sr * 20.0)
+    if total_len > max_samples:
+        start_samp = min(int(sr * 15.0), max(0, (total_len - max_samples) // 3))
+        end_samp = start_samp + max_samples
+        y_eval = y[..., start_samp:end_samp]
+    else:
+        y_eval = y
+
+    y_mono = np.mean(y_eval, axis=0) if y_eval.ndim > 1 else y_eval
+    is_stereo = y_eval.ndim > 1 and y_eval.shape[0] == 2
     
     # 1. Welch Power Spectral Density
-    nperseg = min(len(y_mono), 8192)
+    nperseg = min(len(y_mono), 4096)
     freqs, psd = signal.welch(y_mono, fs=sr, nperseg=nperseg)
     total_energy = float(np.sum(psd) + 1e-15)
     
@@ -52,12 +62,12 @@ def detect_watermark_signature(y: np.ndarray, sr: int) -> Dict[str, Any]:
     # Filter 2: Stereo Phase Disparity Anomaly in > 18kHz
     phase_anomaly_score = 0.0
     phase_disparity_deg = 0.0
-    if is_stereo and len(y[0]) >= 2048:
+    if is_stereo and len(y_eval[0]) >= 2048:
         try:
             n_fft = 2048
             hop = 512
-            _, _, Zxx_l = signal.stft(y[0], fs=sr, nperseg=n_fft, noverlap=n_fft - hop)
-            _, _, Zxx_r = signal.stft(y[1], fs=sr, nperseg=n_fft, noverlap=n_fft - hop)
+            _, _, Zxx_l = signal.stft(y_eval[0], fs=sr, nperseg=n_fft, noverlap=n_fft - hop)
+            _, _, Zxx_r = signal.stft(y_eval[1], fs=sr, nperseg=n_fft, noverlap=n_fft - hop)
             f_stft = np.fft.rfftfreq(n_fft, 1.0 / sr)
             stft_ultra_mask = f_stft >= 18000
             if np.any(stft_ultra_mask):

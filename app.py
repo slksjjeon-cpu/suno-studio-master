@@ -428,6 +428,27 @@ def _load_task_from_disk(task_id: str) -> Optional[dict]:
 latest_studio_track: Dict[str, Any] = {
     "file_path": None, "filename": None, "title": None, "audio_url": None, "image_url": None
 }
+LATEST_TRACK_FILE = Path(DATA_DIR) / "latest_studio_track.json"
+
+def _save_latest_track_to_disk():
+    try:
+        os.makedirs(DATA_DIR, exist_ok=True)
+        with open(LATEST_TRACK_FILE, "w", encoding="utf-8") as f:
+            json.dump(latest_studio_track, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
+def _load_latest_track_from_disk() -> bool:
+    if LATEST_TRACK_FILE.exists():
+        try:
+            with open(LATEST_TRACK_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, dict) and data.get("file_path") and os.path.exists(data["file_path"]):
+                    latest_studio_track.update(data)
+                    return True
+        except Exception:
+            pass
+    return False
 
 # Hum Studio Global State
 hum_stems = HumStems()
@@ -510,21 +531,24 @@ def _sync_to_hum_studio(filepath: str, title: str = None):
     except Exception as e:
         print("[HumSync] Warning auto-syncing to Hum Studio:", e)
 
-# Auto-initialize with newest available user track in uploads on startup
+# Auto-initialize with persisted active track or newest available user track in uploads on startup
 try:
-    user_mp3s = [p for p in sorted(Path(UPLOADS_DIR).glob("*.mp3"), key=lambda x: x.stat().st_mtime) if not p.name.startswith("check_")]
-    if user_mp3s:
-        newest = user_mp3s[-1]
-        t_guess = re.sub(r"^yt_", "", newest.stem)
-        latest_studio_track.update({
-            "file_path": str(newest),
-            "filename": newest.name,
-            "title": t_guess,
-            "audio_url": f"/uploads/{urllib.parse.quote(newest.name)}"
-        })
-        hum_current["file"] = {"name": newest.name, "path": str(newest), "title": t_guess}
+    if not _load_latest_track_from_disk():
+        user_mp3s = [p for p in sorted(Path(UPLOADS_DIR).glob("*.mp3"), key=lambda x: x.stat().st_mtime) if not p.name.startswith("check_")]
+        if user_mp3s:
+            newest = user_mp3s[-1]
+            t_guess = re.sub(r"^yt_", "", newest.stem)
+            latest_studio_track.update({
+                "file_path": str(newest),
+                "filename": newest.name,
+                "title": t_guess,
+                "audio_url": f"/uploads/{urllib.parse.quote(newest.name)}"
+            })
+            _save_latest_track_to_disk()
+    if latest_studio_track.get("file_path") and os.path.exists(latest_studio_track["file_path"]):
+        hum_current["file"] = {"name": latest_studio_track["filename"], "path": latest_studio_track["file_path"], "title": latest_studio_track["title"]}
         with hum_lock:
-            if hum_stems.load_cache(newest):
+            if hum_stems.load_cache(Path(latest_studio_track["file_path"])):
                 _set_hum_job("ready", f"캐시 적중 ({hum_stems.dur:.0f}초), 바로 사용 가능", phase="analyze", pct=100)
 except Exception:
     pass
@@ -550,6 +574,7 @@ def _run_analysis_task(task_id: str, filepath: str, audio_url: str):
             "title": fname_clean,
             "audio_url": audio_url
         })
+        _save_latest_track_to_disk()
         _sync_to_hum_studio(filepath, title=fname_clean)
 
         analysis_tasks[task_id]["status"] = "completed"
@@ -594,6 +619,8 @@ def _run_suno_import_and_analysis_task(task_id: str, suno_url: str):
                 analysis_tasks[task_id]["progress"] = overall_pct
                 analysis_tasks[task_id]["stage"] = stage_msg
                 analysis_tasks[task_id]["remaining_sec"] = remaining_sec
+                _save_task_to_disk(task_id)
+                _save_task_to_disk(task_id)
 
         analysis = analyze_suno_track(filepath, progress_callback=on_analysis_progress, metadata={"title": suno_title, "song_id": dl_res.get("song_id")})
         analysis["audio_url"] = audio_url
@@ -610,6 +637,7 @@ def _run_suno_import_and_analysis_task(task_id: str, suno_url: str):
             "audio_url": audio_url,
             "image_url": dl_res.get("image_url")
         })
+        _save_latest_track_to_disk()
         _sync_to_hum_studio(filepath, title=suno_title)
 
         analysis_tasks[task_id]["status"] = "completed"
@@ -760,6 +788,7 @@ def _run_youtube_import_and_analysis_task(task_id: str, youtube_url: str):
                 analysis_tasks[task_id]["progress"] = overall_pct
                 analysis_tasks[task_id]["stage"] = stage_msg
                 analysis_tasks[task_id]["remaining_sec"] = remaining_sec
+                _save_task_to_disk(task_id)
 
         analysis = analyze_suno_track(
             final_mp3_path,
@@ -788,6 +817,7 @@ def _run_youtube_import_and_analysis_task(task_id: str, youtube_url: str):
             "audio_url": analysis["audio_url"],
             "image_url": analysis["image_url"]
         })
+        _save_latest_track_to_disk()
         _sync_to_hum_studio(final_mp3_path, title=clean_title)
 
         analysis_tasks[task_id]["status"] = "completed"
@@ -1301,7 +1331,11 @@ def enqueue_mastering_job(req: EnqueueMasteringRequest):
         if fallback and os.path.exists(fallback):
             source_path = fallback
         else:
-            raise HTTPException(status_code=400, detail="원본 오디오 파일을 찾을 수 없거나 허용된 폴더 밖의 경로입니다.")
+            user_mp3s = [p for p in sorted(Path(UPLOADS_DIR).glob("*.mp3"), key=lambda x: x.stat().st_mtime) if not p.name.startswith("check_")]
+            if user_mp3s:
+                source_path = str(user_mp3s[-1])
+            else:
+                raise HTTPException(status_code=400, detail="원본 오디오 파일을 찾을 수 없거나 허용된 폴더 밖의 경로입니다.")
 
     norm_opts = _normalize_mastering_options(req.mastering_options)
     if req.track_title and not norm_opts.get("track_title"):

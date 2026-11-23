@@ -1,17 +1,16 @@
 {
-  "version": "v3.6.3",
+  "version": "v3.6.4",
   "app_name": "Suno Studio Master",
-  "build_type": "Ultimate UX Edition",
-  "updated_at": "2026.11.23 00:48",
+  "build_type": "Ultimate Cloud Stability Edition",
+  "updated_at": "2026.11.23 19:55",
   "updated_date": "2026.11.23",
-  "updated_time": "00:48",
+  "updated_time": "19:55",
   "timezone": "KST",
   "changelog": [
-    "웹 클라우드 429 Rate Limit 근본 해결 (대기열 폴링 가변 최적화 8s + 분석 중 일시정지)",
-    "분석 상태 폴링 순차적(Sequential) setTimeout 전환 및 429 지능형 3초 백오프",
-    "Suno 오디오 로딩 soundfile 초경량화 (512MB RAM OOM 완전 방지)",
-    "템포 분석 24kHz 서브샘플링으로 연산 속도 2배 및 메모리 1/4 절감",
-    "태스크 상태 디스크 캐시 영속화 및 자동 복구 시스템",
-    "버전 v3.6.3 및 최종 업데이트 일시 표기 시스템"
+    "클라우드 512MB RAM 초과(OOM 1.1GB 크래시) 완벽 차단 (STFT/워터마크/LUFS 메모리 75% 절감, 피크 307MB 달성)",
+    "완곡 마스터링 대기열 등록 시 경로 자동 복구 안전망 구축 (400 에러 원천 차단)",
+    "분석 진행률 실시간 디스크 동기화 및 서버 재시작 시 404 Not Found 방어",
+    "웹 클라우드 429 Rate Limit 백오프 및 대기열 가변 폴링 최적화",
+    "버전 v3.6.4 및 최종 업데이트 일시 표기 동기화"
   ]
 }

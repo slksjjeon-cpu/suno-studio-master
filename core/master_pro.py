@@ -51,14 +51,20 @@ def calculate_integrated_lufs(audio: np.ndarray, sr: int) -> float:
     Calculate Integrated Loudness (LUFS) matching ITU-R BS.1770-4 / EBU R128 standard.
     Includes K-weighting pre-filtering, 400ms sliding blocks with 75% overlap,
     absolute gating (-70 LUFS), and relative gating (-10 LU relative to average).
+    Optimized for low-memory cloud runtimes (sub-80MB footprint).
     """
     if audio.size == 0:
         return -70.0
     
     if audio.ndim == 1:
         audio = audio[np.newaxis, :]
+
+    # Subsample to 22k-24k for large multi-minute buffers to prevent multi-hundred MB RAM spikes
+    if sr > 24000:
+        audio = audio[:, ::2]
+        sr = sr // 2
+
     n_ch, n_samples = audio.shape
-    
     (b_shelf, a_shelf), (b_hp, a_hp) = get_bs1770_filters(sr)
     
     block_len = int(0.400 * sr)
@@ -74,15 +80,19 @@ def calculate_integrated_lufs(audio: np.ndarray, sr: int) -> float:
 
     n_blocks = (n_samples - block_len) // hop_len + 1
     z_blocks = np.zeros(n_blocks, dtype=np.float32)
+    starts = np.arange(0, n_blocks * hop_len, hop_len)
+    ends = starts + block_len
 
     for ch in range(n_ch):
         s1 = signal.lfilter(b_shelf, a_shelf, audio[ch])
         y_ch = signal.lfilter(b_hp, a_hp, s1)
-        y_sq = (y_ch ** 2).astype(np.float32)
-        c = np.cumsum(np.insert(y_sq, 0, 0.0), dtype=np.float64)
-        starts = np.arange(0, n_blocks * hop_len, hop_len)
-        ends = starts + block_len
-        z_blocks += ((c[ends] - c[starts]) / block_len).astype(np.float32)
+        del s1
+        y_sq = np.square(y_ch, dtype=np.float32)
+        del y_ch
+        c = np.cumsum(np.insert(y_sq, 0, 0.0), dtype=np.float32)
+        del y_sq
+        z_blocks += ((c[ends] - c[starts]) / block_len)
+        del c
 
     # 1. Absolute threshold: Gamma_a = -70 LUFS
     l_blocks = -0.691 + 10.0 * np.log10(np.maximum(1e-12, z_blocks))

@@ -23,6 +23,8 @@ def compute_frequency_curve(y: np.ndarray, sr: int, num_bands: int = 32) -> List
     if len(y) == 0:
         return [0.5] * num_bands
     y_mono = np.mean(y, axis=0) if y.ndim > 1 else y
+    if len(y_mono) > sr * 30:
+        y_mono = y_mono[:int(sr * 30)]
     nperseg = min(len(y_mono), 4096)
     freqs, psd = signal.welch(y_mono, fs=sr, nperseg=nperseg)
     
@@ -47,9 +49,10 @@ def compute_smart_mastering_recommendations(y: np.ndarray, sr: int, watermark_in
     y_mono = np.mean(y, axis=0) if y.ndim > 1 else y
     is_stereo = y.ndim > 1 and y.shape[0] == 2
     
-    # 1. Welch PSD for Band Energies
-    nperseg = min(len(y_mono), 4096)
-    freqs, psd = signal.welch(y_mono, fs=sr, nperseg=nperseg)
+    # 1. Welch PSD for Band Energies (on representative 30s slice to keep cloud memory < 60MB)
+    y_slice = y_mono[:int(sr * 30)] if len(y_mono) > sr * 30 else y_mono
+    nperseg = min(len(y_slice), 4096)
+    freqs, psd = signal.welch(y_slice, fs=sr, nperseg=nperseg)
     total_energy = float(np.sum(psd) + 1e-15)
     
     mask_sub = (freqs >= 30) & (freqs < 120)
@@ -186,11 +189,11 @@ def generate_waveform_peaks(y: np.ndarray, num_peaks: int = 800) -> List[float]:
 def generate_spectrogram_summary(y: np.ndarray, sr: int, num_frames: int = 64) -> List[List[float]]:
     """Generate compact 2D spectrogram matrix (time x frequency bins) for visual comparison."""
     y_mono = np.mean(y, axis=0) if y.ndim > 1 else y
-    # Compute STFT
-    hop_length = max(512, len(y_mono) // (num_frames * 4))
-    D = np.abs(librosa.stft(y_mono, n_fft=2048, hop_length=hop_length))
-    # Log frequency bins (downsample to 32 frequency bands)
-    mel = librosa.feature.melspectrogram(S=D, sr=sr, n_mels=24)
+    # Ultra-low memory melspectrogram on downsampled mono
+    y_sub = y_mono[::2] if sr > 22050 else y_mono
+    sr_sub = sr // 2 if sr > 22050 else sr
+    hop_length = max(512, len(y_sub) // (num_frames * 2))
+    mel = librosa.feature.melspectrogram(y=y_sub, sr=sr_sub, n_fft=1024, hop_length=hop_length, n_mels=24)
     mel_db = librosa.power_to_db(mel, ref=np.max)
     
     # Normalize 0.0 ~ 1.0
