@@ -217,11 +217,21 @@ def upload_video_to_youtube(
         progress_cb(10, f"'{title}' 유튜브 업로드 시작...")
 
     response = None
+    retry_count = 0
+    max_chunk_retries = 5
     while response is None:
-        status, response = request.next_chunk()
-        if status and progress_cb:
-            pct = int(status.progress() * 85) + 10
-            progress_cb(pct, f"유튜브 업로드 중... {pct}%")
+        try:
+            status, response = request.next_chunk(num_retries=3)
+            if status and progress_cb:
+                pct = int(status.progress() * 85) + 10
+                progress_cb(pct, f"유튜브 업로드 중... {pct}%")
+            retry_count = 0
+        except Exception as chunk_err:
+            retry_count += 1
+            if retry_count > max_chunk_retries:
+                raise chunk_err
+            print(f"[YouTubeUploader] Chunk upload retry {retry_count}/{max_chunk_retries}: {chunk_err}")
+            time.sleep(2 * retry_count)
 
     video_id = response.get("id")
     if not video_id:

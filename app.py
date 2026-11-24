@@ -3104,7 +3104,7 @@ async def upload_and_check_copyright_api(file: UploadFile = File(...)):
 import zipfile
 
 BATCH_TASKS: Dict[str, dict] = {}
-batch_lock = threading.Lock()
+batch_lock = threading.RLock()
 
 class BatchStartRequest(BaseModel):
     urls: list[str]
@@ -3432,22 +3432,24 @@ def _process_batch_job(batch_id: str):
                     item["mp4_name"] = mp4_path.name
                 task["completed"] += 1
 
-                # Human-like Cooldown Delay (인간화 안티-스팸 쿨다운 딜레이)
-                cur_idx = item.get("index", idx)
+            # Human-like Cooldown Delay (인간화 안티-스팸 쿨다운 딜레이)
+            # Must run OUTSIDE completion lock so it never blocks status polling
+            cur_idx = item.get("index", idx)
+            with batch_lock:
                 remaining_pending = [it for it in items[cur_idx + 1:] if it.get("status") == "pending"]
-                if upload_youtube and item.get("youtube_url") and remaining_pending and use_cooldown and not task.get("cancelled"):
-                    cooldown_sec = random.randint(25, 35)
-                    for rem in range(cooldown_sec, 0, -1):
-                        if task.get("cancelled"):
-                            break
-                        with batch_lock:
-                            task["cooldown_remaining"] = rem
-                            task["cooldown_total"] = cooldown_sec
-                            task["status_msg"] = f"🛡️ 유튜브 스팸 방지 쿨다운 중... (다음 곡까지 {rem}초 대기)"
-                        time.sleep(1)
+            if upload_youtube and item.get("youtube_url") and remaining_pending and use_cooldown and not task.get("cancelled"):
+                cooldown_sec = random.randint(25, 35)
+                for rem in range(cooldown_sec, 0, -1):
+                    if task.get("cancelled"):
+                        break
                     with batch_lock:
-                        task["cooldown_remaining"] = 0
-                        task["status_msg"] = None
+                        task["cooldown_remaining"] = rem
+                        task["cooldown_total"] = cooldown_sec
+                        task["status_msg"] = f"🛡️ 유튜브 스팸 방지 쿨다운 중... (다음 곡까지 {rem}초 대기)"
+                    time.sleep(1)
+                with batch_lock:
+                    task["cooldown_remaining"] = 0
+                    task["status_msg"] = None
 
         except Exception as exc:
             import traceback

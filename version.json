@@ -1,18 +1,16 @@
 {
-  "version": "v3.6.6",
+  "version": "v3.6.7",
   "app_name": "Suno Studio Master",
-  "build_type": "Cloud Ultra-Low Memory & Resilient Stream Edition",
-  "updated_at": "2026.11.23 20:17",
-  "updated_date": "2026.11.23",
-  "updated_time": "20:17",
+  "build_type": "Batch Resilient & Anti-Deadlock Edition",
+  "updated_at": "2026.11.24 20:55",
+  "updated_date": "2026.11.24",
+  "updated_time": "20:55",
   "timezone": "KST",
   "changelog": [
+    "배치 플레이리스트 유튜브 자동 업로드 시 데드락(Deadlock) 원천 해결 (RLock 전환 및 쿨다운 루프 락 분리)",
+    "유튜브 청크 업로드 자동 재시도(num_retries=3, max 5회) 안정화",
+    "배치 상태 폴링 실패 시 자동 복구 타이머 안전망 구축",
     "FFmpeg 변환 타임아웃 120초 상향 및 논블로킹(-nostdin, stdin=DEVNULL) 안정화",
-    "Suno 오디오 복호화 및 직접 MP3 바이패스 고속 처리",
-    "다운로드 및 분석 전 과정 실시간 디스크 동기화로 404 상태 유실 원천 방지",
-    "템포 분석 11kHz 초저메모리 서브샘플링 & win_length 최적화 (69% OOM 완전 해결)",
-    "LUFS BS.1770-4 및 워터마크 STFT 20s 윈도우링 메모리 75% 절감",
-    "완곡 마스터링 대기열 등록 시 경로 자동 복구 안전망 구축 (400 에러 원천 차단)",
-    "버전 v3.6.6 및 최종 업데이트 일시 표기 동기화"
+    "버전 v3.6.7 및 최종 업데이트 일시 표기 동기화"
   ]
 }

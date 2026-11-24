@@ -7874,7 +7874,12 @@ async function pollBatchJob() {
   if (!currentBatchId) return;
   try {
     const resp = await fetch(`/api/batch/status/${currentBatchId}`);
-    if (!resp.ok) return;
+    if (!resp.ok) {
+      console.warn(`Batch status HTTP ${resp.status}, retrying in 2s...`);
+      if (batchPollTimer) clearTimeout(batchPollTimer);
+      batchPollTimer = setTimeout(pollBatchJob, 2000);
+      return;
+    }
     const batch = await resp.json();
     renderBatchStatus(batch);
 
