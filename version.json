@@ -1,16 +1,16 @@
 {
-  "version": "v3.6.7",
+  "version": "v3.6.8",
   "app_name": "Suno Studio Master",
-  "build_type": "Batch Resilient & Anti-Deadlock Edition",
-  "updated_at": "2026.11.24 20:55",
-  "updated_date": "2026.11.24",
-  "updated_time": "20:55",
+  "build_type": "Ultra-Fast 360p & Lossless Audio Edition",
+  "updated_at": "2026.11.26 22:30",
+  "updated_date": "2026.11.26",
+  "updated_time": "22:30",
   "timezone": "KST",
   "changelog": [
-    "배치 플레이리스트 유튜브 자동 업로드 시 데드락(Deadlock) 원천 해결 (RLock 전환 및 쿨다운 루프 락 분리)",
-    "유튜브 청크 업로드 자동 재시도(num_retries=3, max 5회) 안정화",
-    "배치 상태 폴링 실패 시 자동 복구 타이머 안전망 구축",
-    "FFmpeg 변환 타임아웃 120초 상향 및 논블로킹(-nostdin, stdin=DEVNULL) 안정화",
-    "버전 v3.6.7 및 최종 업데이트 일시 표기 동기화"
+    "유튜브 자동 업로드 시 테스트용 360p(640x360) 초고속 인코딩 적용 (인코딩 0.9초 대폭 단축, 용량 80% 이상 절감)",
+    "음원 재압축/손실 없이 원본 비트스트림 100% 무손실 복사(-c:a copy) 유지",
+    "배치 플레이리스트 유튜브 자동 업로드 데드락(Deadlock) 해결 (RLock 전환 및 쿨다운 루프 분리)",
+    "유튜브 봇 탐지 에러 안내 및 음원 불러오기 경로 매핑 안정화",
+    "버전 v3.6.8 및 최종 업데이트 일시 표기 동기화"
   ]
 }

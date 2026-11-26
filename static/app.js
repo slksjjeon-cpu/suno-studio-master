@@ -195,8 +195,8 @@ document.addEventListener("DOMContentLoaded", () => {
 // STUDIO VERSION & LAST UPDATE DISPLAY SYSTEM
 // =========================================================================
 async function initStudioVersionInfo() {
-  const DEFAULT_VERSION = "v3.6.0";
-  const DEFAULT_UPDATED = "2026.11.23 00:15";
+  const DEFAULT_VERSION = "v3.6.8";
+  const DEFAULT_UPDATED = "2026.11.26 22:30";
 
   const applyVersionData = (data) => {
     const ver = data.version || DEFAULT_VERSION;
@@ -7781,11 +7781,13 @@ window.updatePureYoutubeBadge = function() {
   if (!badge) return;
   if (!mp3 && !mp4 && yt) {
     badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-blue-500/15 text-[#3182f6] border border-[#3182f6]/30 font-semibold font-sans';
-    badge.textContent = '⚡ 순수 유튜브 전송 (PC 저장 0MB)';
+    badge.textContent = '⚡ 순수 유튜브 전송 (테스트용 360p 고속 / 원본 음원 비압축)';
+    badge.title = '유튜브 테스트용 저해상도(360p) 인코딩으로 수초 만에 초고속 업로드되며, 음원은 압축 없이 원본 그대로 보존됩니다.';
     badge.style.display = 'inline-block';
   } else if (yt) {
     badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-sans';
-    badge.textContent = 'PC 저장 + 유튜브 동시 업로드';
+    badge.textContent = 'PC 저장 + 유튜브 업로드 (원본 음원 비압축)';
+    badge.title = '음원은 압축 없이 원본 그대로 보존됩니다.';
     badge.style.display = 'inline-block';
   } else {
     badge.style.display = 'none';

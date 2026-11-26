@@ -2414,51 +2414,75 @@ async def export_mp4_endpoint(req: ExportMp4Request):
             atempo_filters.append(f"atempo={cur_spd:.4f}")
             atempo_str = ",".join(atempo_filters)
 
-        # 4. Run FFmpeg command for 720P (1280x720) 16:9 MP4
+        # 4. Determine Resolution & Audio Quality based on YouTube Test Mode
+        is_yt = bool(req.upload_youtube)
+        has_speed_pitch_change = (abs(pitch_shift) > 0.005 or abs(speed - 1.0) > 0.005)
+        target_res = "640x360" if is_yt else "1280x720"
+        tag_res_str = "_360p" if is_yt else "_720p"
+
+        # If audio tempo/pitch is modified, we must filter and encode at studio 320k.
+        # Otherwise, keep audio 100% original uncompressed (-c:a copy).
+        if has_speed_pitch_change:
+            audio_map_args = ["-filter_complex", f"[1:a]{atempo_str}[a]", "-map", "[a]", "-c:a", "aac", "-b:a", "320k"]
+        else:
+            audio_map_args = ["-map", "1:a", "-c:a", "copy"]
+
         if has_custom_image and os.path.exists(temp_img_path):
             cmd = [
                 ffmpeg, "-y",
                 "-loop", "1",
-                "-framerate", "1",
+                "-framerate", "2" if is_yt else "1",
                 "-i", temp_img_path,
                 "-i", audio_path,
-                "-filter_complex", f"[1:a]{atempo_str}[a]",
                 "-map", "0:v",
-                "-map", "[a]",
+                *audio_map_args,
                 *duration_flags,
-                "-s", "1280x720",
+                "-s", target_res,
                 "-c:v", "libx264",
                 "-tune", "stillimage",
                 "-preset", "ultrafast",
-                "-crf", "22",
-                "-c:a", "aac",
-                "-b:a", "192k",
+                "-crf", "24" if is_yt else "22",
                 "-pix_fmt", "yuv420p",
                 "-movflags", "+faststart",
                 temp_render_mp4
             ]
         else:
-            # Fallback 720P dark background
+            # Fallback dark background
             cmd = [
                 ffmpeg, "-y",
-                "-f", "lavfi", "-i", "color=c=0x0f172a:s=1280x720:r=1",
+                "-f", "lavfi", "-i", f"color=c=0x0f172a:s={target_res}:r=2",
                 "-i", audio_path,
-                "-filter_complex", f"[1:a]{atempo_str}[a]",
                 "-map", "0:v",
-                "-map", "[a]",
+                *audio_map_args,
                 *duration_flags,
                 "-c:v", "libx264",
                 "-tune", "stillimage",
                 "-preset", "ultrafast",
-                "-crf", "22",
-                "-c:a", "aac",
-                "-b:a", "192k",
+                "-crf", "24" if is_yt else "22",
                 "-pix_fmt", "yuv420p",
                 "-movflags", "+faststart",
                 temp_render_mp4
             ]
 
-        subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", check=True)
+        res_proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace")
+        if res_proc.returncode != 0 and "-c:a copy" in " ".join(cmd):
+            # Fallback if muxer cannot copy audio stream
+            fallback_audio_args = ["-filter_complex", f"[1:a]{atempo_str}[a]", "-map", "[a]", "-c:a", "aac", "-b:a", "320k"] if has_speed_pitch_change else ["-map", "1:a", "-c:a", "aac", "-b:a", "320k"]
+            cmd_fallback = [c for c in cmd]
+            # Replace audio args
+            cmd_fallback = [
+                ffmpeg, "-y",
+                *(["-loop", "1", "-framerate", "2" if is_yt else "1", "-i", temp_img_path] if has_custom_image and os.path.exists(temp_img_path) else ["-f", "lavfi", "-i", f"color=c=0x0f172a:s={target_res}:r=2"]),
+                "-i", audio_path,
+                "-map", "0:v",
+                *fallback_audio_args,
+                *duration_flags,
+                "-s", target_res,
+                "-c:v", "libx264", "-tune", "stillimage", "-preset", "ultrafast",
+                "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+                temp_render_mp4
+            ]
+            subprocess.run(cmd_fallback, capture_output=True, text=True, encoding="utf-8", errors="replace", check=True)
 
         if os.path.exists(temp_img_path):
             try: os.unlink(temp_img_path)
@@ -2466,7 +2490,7 @@ async def export_mp4_endpoint(req: ExportMp4Request):
 
         # Smart Duplicate Preservation by File Size
         rendered_size = os.path.getsize(temp_render_mp4)
-        desired_name = f"{clean_title}{tag_str}_720p.mp4"
+        desired_name = f"{clean_title}{tag_str}{tag_res_str}.mp4"
         safe_mp4_path = get_safe_unique_filepath(OUTPUTS_DIR, desired_name, new_file_size=rendered_size)
         if safe_mp4_path.exists() and os.path.getsize(str(safe_mp4_path)) == rendered_size and str(safe_mp4_path) != temp_render_mp4:
             try: os.unlink(temp_render_mp4)
@@ -3291,8 +3315,12 @@ def _process_batch_job(batch_id: str):
                 mp3_path = target_mp3
 
                 if export_mp4 or upload_youtube:
+                    is_for_yt = upload_youtube
                     with batch_lock:
-                        item["message"] = "Suno 고화질 영상(MP4) 생성 중..."
+                        if is_for_yt and not export_mp4:
+                            item["message"] = "유튜브 전송 영상 생성 중 (360p 고속 / 원본 음원 비압축 보존)..."
+                        else:
+                            item["message"] = "Suno 영상(MP4) 생성 중..."
                         item["progress"] = 75
                     temp_mp4 = batch_out_dir / f"temp_{uuid.uuid4().hex[:8]}.mp4"
                     img_url = dl_res.get("image_url")
@@ -3303,23 +3331,58 @@ def _process_batch_job(batch_id: str):
                         except Exception:
                             cover_img = None
 
+                    # If uploading to YouTube (test/speed mode requested by user):
+                    # Encode video in low resolution (640x360 360p @ 2fps) for instant upload,
+                    # while keeping audio bit-for-bit uncompressed (-c:a copy).
+                    if is_for_yt:
+                        vf_scale = "scale=640:360:force_original_aspect_ratio=decrease,pad=640:360:(ow-iw)/2:(oh-ih)/2:color=black"
+                        lavfi_src = "color=c=#0b0f19:s=640x360:r=2"
+                        fps_val = "2"
+                    else:
+                        vf_scale = "scale=trunc(iw/2)*2:trunc(ih/2)*2"
+                        lavfi_src = "color=c=#0b0f19:s=1280x720:r=30"
+                        fps_val = "30"
+
                     if cover_img and cover_img.exists():
                         cmd = [
-                            ffmpeg_exe, "-y", "-loop", "1", "-i", str(cover_img),
+                            ffmpeg_exe, "-y", "-loop", "1", "-framerate", fps_val,
+                            "-i", str(cover_img),
                             "-i", str(mp3_path),
-                            "-vf", "scale=trunc(iw/2)*2:trunc(ih/2)*2",
-                            "-c:v", "libx264", "-tune", "stillimage",
-                            "-c:a", "aac", "-b:a", "320k", "-pix_fmt", "yuv420p",
-                            "-shortest", str(temp_mp4)
+                            "-vf", vf_scale,
+                            "-c:v", "libx264", "-tune", "stillimage", "-preset", "ultrafast",
+                            "-c:a", "copy" if is_for_yt else "aac",
+                            *([] if is_for_yt else ["-b:a", "320k"]),
+                            "-pix_fmt", "yuv420p",
+                            "-shortest", "-movflags", "+faststart",
+                            str(temp_mp4)
                         ]
                     else:
                         cmd = [
-                            ffmpeg_exe, "-y", "-f", "lavfi", "-i", "color=c=#0b0f19:s=1280x720:r=30",
-                            "-i", str(mp3_path), "-c:v", "libx264",
-                            "-c:a", "aac", "-b:a", "320k", "-pix_fmt", "yuv420p",
-                            "-shortest", str(temp_mp4)
+                            ffmpeg_exe, "-y", "-f", "lavfi", "-i", lavfi_src,
+                            "-i", str(mp3_path),
+                            "-c:v", "libx264", "-tune", "stillimage", "-preset", "ultrafast",
+                            "-c:a", "copy" if is_for_yt else "aac",
+                            *([] if is_for_yt else ["-b:a", "320k"]),
+                            "-pix_fmt", "yuv420p",
+                            "-shortest", "-movflags", "+faststart",
+                            str(temp_mp4)
                         ]
-                    subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+                    res_render = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    if res_render.returncode != 0:
+                        # Fallback to AAC 320k re-encode only if muxer couldn't copy original stream
+                        cmd_fb = [
+                            ffmpeg_exe, "-y",
+                            *(["-loop", "1", "-framerate", fps_val, "-i", str(cover_img)] if (cover_img and cover_img.exists()) else ["-f", "lavfi", "-i", lavfi_src]),
+                            "-i", str(mp3_path),
+                            *(["-vf", vf_scale] if (cover_img and cover_img.exists()) else []),
+                            "-c:v", "libx264", "-tune", "stillimage", "-preset", "ultrafast",
+                            "-c:a", "aac", "-b:a", "320k",
+                            "-pix_fmt", "yuv420p",
+                            "-shortest", "-movflags", "+faststart",
+                            str(temp_mp4)
+                        ]
+                        subprocess.run(cmd_fb, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
                     # Smart Duplicate Preservation by File Size
                     rendered_size = temp_mp4.stat().st_size

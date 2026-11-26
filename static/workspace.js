@@ -110,7 +110,7 @@
         <a class="ws-brand" href="#" aria-label="스튜디오 홈">
           <span class="ws-brand-mark">♫</span>
           <span>music<br><b>studio.</b></span>
-          <span class="ws-version-badge" id="ws-brand-ver" style="font-size:10px; font-weight:800; font-family:monospace; color:#22d3ee; background:rgba(6,182,212,0.15); border:1px solid rgba(6,182,212,0.3); padding:1px 6px; border-radius:6px; margin-left:auto;">v3.6.7</span>
+          <span class="ws-version-badge" id="ws-brand-ver" style="font-size:10px; font-weight:800; font-family:monospace; color:#22d3ee; background:rgba(6,182,212,0.15); border:1px solid rgba(6,182,212,0.3); padding:1px 6px; border-radius:6px; margin-left:auto;">v3.6.8</span>
         </a>
         <div class="ws-sidebar-label">MY WORKSPACE</div>
         <nav aria-label="작업 단계">
@@ -124,12 +124,12 @@
         <div class="ws-sidebar-bottom">
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
             <span style="display:flex; align-items:center; gap:6px;"><span class="ws-live-dot"></span> LOCAL WORKSPACE</span>
-            <span id="ws-sidebar-ver" style="font-size:10px; font-family:monospace; font-weight:700; color:#22d3ee;">v3.6.7</span>
+            <span id="ws-sidebar-ver" style="font-size:10px; font-family:monospace; font-weight:700; color:#22d3ee;">v3.6.8</span>
           </div>
           <p>당신의 음악에 집중하는 공간.</p>
           <div id="ws-sidebar-updated" style="margin-top:6px; font-size:10.5px; color:#94a3b8; font-family:monospace; display:flex; align-items:center; gap:4px;">
             <i class="fa-regular fa-clock" style="color:#06b6d4; font-size:9.5px;"></i>
-            <span>업데이트: 2026.11.24 20:55</span>
+            <span>업데이트: 2026.11.26 22:30</span>
           </div>
         </div>
       </aside>
@@ -139,8 +139,8 @@
           <div class="ws-session-meta" style="display:inline-flex; align-items:center; gap:8px;">
             <span class="ws-version-pill" id="ws-session-ver" style="font-size:11px; font-family:monospace; font-weight:700; color:#38bdf8; background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.25); padding:2px 8px; border-radius:8px; display:inline-flex; align-items:center; gap:5px;" title="최종 업데이트 날짜와 시간">
               <i class="fa-solid fa-code-branch" style="font-size:10px;"></i>
-              <span id="ws-ver-num">v3.6.7</span>
-              <span id="ws-ver-date" style="color:#94a3b8; font-weight:500;">· 2026.11.24 20:55</span>
+              <span id="ws-ver-num">v3.6.8</span>
+              <span id="ws-ver-date" style="color:#94a3b8; font-weight:500;">· 2026.11.26 22:30</span>
             </span>
             <span id="ws-queue">대기열 0</span>
           </div>
@@ -165,8 +165,8 @@
         <section data-ws-page="hum" hidden aria-label="허밍 믹서"><div id="ws-hum-slot"></div></section>
         <section data-ws-page="copyright" hidden aria-label="저작권 참고 진단"><div id="ws-copyright-slot"></div></section>
         <footer class="ws-footer">
-          <span>MUSIC STUDIO <b id="ws-footer-ver">v3.6.7</b> — MADE FOR YOUR SOUND.</span>
-          <span id="ws-footer-updated">최종 업데이트: 2026.11.24 20:55 KST / 로컬 작업 공간</span>
+          <span>MUSIC STUDIO <b id="ws-footer-ver">v3.6.8</b> — MADE FOR YOUR SOUND.</span>
+          <span id="ws-footer-updated">최종 업데이트: 2026.11.26 22:30 KST / 로컬 작업 공간</span>
         </footer>
       </div>`;
     bar.after(shell);
